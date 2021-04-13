@@ -101,6 +101,7 @@ branding:
 	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
 	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
 	sed -i '/FOREMAN_\w/ s/FOREMAN_/SATELLITE_/g' Makefile
+	sed -i '/foreman_proxy_\w/ s/foreman_proxy_/capsule_/g' roles/*/README.md roles/*/*/*.yml
 	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
 	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade
