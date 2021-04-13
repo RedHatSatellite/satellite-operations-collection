@@ -1,6 +1,6 @@
-===================================
-theforeman.operations Release Notes
-===================================
+=========================================
+redhat.satellite-operations Release Notes
+=========================================
 
 .. contents:: Topics
 

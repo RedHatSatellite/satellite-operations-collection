@@ -93,6 +93,20 @@ doc: $(MANIFEST)
 	antsibull-docs collection --use-current --squash-hierarchy --dest-dir ./docs/plugins $(NAMESPACE).$(NAME)
 	make -C docs html
 
+branding:
+	sed -i 's/theforeman\.operations/redhat.satellite-operations/g' changelogs/config.yaml changelogs/changelog.yaml CHANGELOG.rst roles/*/README.md roles/*/*/*.yml
+	sed -i 's/foreman.example.com/satellite.example.com/g' roles/*/README.md roles/*/*/*.yml
+	sed -i 's#theforeman/foreman-operations-collection#RedHatSatellite/satellite-operations-collection#g' .github/workflows/*.yml
+	sed -i 's/theforeman-foreman/redhat-satellite-operations/g' .github/workflows/*.yml
+	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
+	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
+	sed -i '/FOREMAN_\w/ s/FOREMAN_/SATELLITE_/g' Makefile
+	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml
+	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
+	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade
+	[ -d roles/foreman_proxy_certs_generate ] && mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate || echo ''
+	rm -rf roles/*/molecule/default
+
 FORCE:
 
 .PHONY: help dist lint sanity test test-crud test-check-mode test-other livetest setup test-setup doc-setup doc publish FORCE
