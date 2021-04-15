@@ -13,7 +13,6 @@ tags:
   - foreman
   - katello
   - satellite
-  - orcharhino
 readme: "README.md"
 homepage: "https://access.redhat.com/products/red-hat-satellite"
 repository: "https://github.com/RedHatSatellite/satellite-operations-collection"

@@ -1,9 +1,11 @@
-Name:           satellite-installer
-Version:        1.0
-Release:        1%{?dist}
-Summary:        A fake satellite-installer RPM that symlinks to foreman-installer and foreman-proxy-certs-generate
+Name:    satellite-installer
+Version: 1.0
+Release: 1%{?dist}
+Summary: A fake satellite-installer RPM that symlinks to foreman-installer and foreman-proxy-certs-generate
 
-License:        GPLv3+
+License: GPLv3+
+
+Requires: foreman-installer-katello
 
 %description
 A fake satellite-installer RPM that symlinks to foreman-installer and foreman-proxy-certs-generate
@@ -15,10 +17,16 @@ mkdir -p %{buildroot}/usr/sbin
 ln -s /usr/sbin/foreman-installer %{buildroot}/usr/sbin/satellite-installer
 ln -s /usr/sbin/foreman-proxy-certs-generate %{buildroot}/usr/sbin/capsule-certs-generate
 
+mkdir -p %{buildroot}/etc/foreman-installer/scenarios.d
+ln -s /etc/foreman-installer/scenarios.d/katello.yaml %{buildroot}/etc/foreman-installer/scenarios.d/satellite.yaml
+ln -s /etc/foreman-installer/scenarios.d/katello-answers.yaml %{buildroot}/etc/foreman-installer/scenarios.d/satellite-answers.yaml
+
 %files
 /usr/sbin/satellite-installer
 /usr/sbin/capsule-certs-generate
+/etc/foreman-installer/scenarios.d/satellite.yaml
+/etc/foreman-installer/scenarios.d/satellite-answers.yaml
 
 %changelog
-* Thu Apr 15 2021 Eric D Helms <ericdhelms@gamil.com> 1.0-1
+* Thu Apr 15 2021 Eric D Helms <ericdhelms@gmail.com> 1.0-1
 - Initial version of the package

@@ -1,9 +1,9 @@
 ---
-- name: 'Generate certificates for a Foreman Proxy'
+- name: 'Generate certificates for a Satellite Capsule'
   command: |
-    {{ satellite_proxy_certs_generate_command }}
-    --foreman-proxy-fqdn {{ satellite_proxy_certs_generate_fqdn }}
-    --certs-tar {{ satellite_proxy_certs_generate_tarball }}
-    {{ satellite_proxy_certs_generate_options | join(' ') }}
+    {{ satellite_capsule_certs_generate_command }}
+    --foreman-proxy-fqdn {{ satellite_capsule_certs_generate_fqdn }}
+    --certs-tar {{ satellite_capsule_certs_generate_tarball }}
+    {{ satellite_capsule_certs_generate_options | join(' ') }}
   args:
-    creates: "{{ satellite_proxy_certs_generate_tarball }}"
+    creates: "{{ satellite_capsule_certs_generate_tarball }}"

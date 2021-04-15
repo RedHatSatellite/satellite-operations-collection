@@ -9,4 +9,3 @@
   roles:
     - theforeman.operations.puppet_repositories
     - theforeman.operations.foreman_repositories
-    - fake_installer_rpm
