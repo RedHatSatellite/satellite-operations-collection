@@ -1,0 +1,18 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    foreman_repositories_version: "2.4"
+    foreman_repositories_katello_version: "4.0"
+  roles:
+    - theforeman.operations.foreman_repositories
+    - theforeman.operations.puppet_repositories
+    - fake_installer_rpm
+  post_tasks:
+    - include_role:
+        name: installer
+      vars:
+        satellite_installer_options:
+          - '--disable-system-checks'

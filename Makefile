@@ -3,7 +3,7 @@ NAME := $(shell python -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))
 VERSION := $(shell python -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["version"])')
 MANIFEST := build/collections/ansible_collections/$(NAMESPACE)/$(NAME)/MANIFEST.json
 
-ROLES := $(wildcard roles/*)
+ROLES := $(foreach ROLE,$(wildcard roles/*),$(filter-out roles/fake_installer_rpm, $(wildcard roles/*)))
 PLUGIN_TYPES := $(filter-out __%,$(notdir $(wildcard plugins/*)))
 METADATA := galaxy.yml LICENSE README.md requirements.txt CHANGELOG.rst
 $(foreach PLUGIN_TYPE,$(PLUGIN_TYPES),$(eval _$(PLUGIN_TYPE) := $(filter-out %__init__.py,$(wildcard plugins/$(PLUGIN_TYPE)/*.py))))

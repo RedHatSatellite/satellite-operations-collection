@@ -1,0 +1,20 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: satellite-installer RPM can be installed
+      package:
+        name: satellite-installer
+        state: present
+
+    - name: find satellite-installer symlink
+      stat:
+        path: /usr/sbin/satellite-installer
+      register: satellite_installer
+
+    - name: check satellite-installer symlink exists
+      assert:
+        that:
+          - satellite_installer.stat.exists
+          - satellite_installer.stat.islnk
