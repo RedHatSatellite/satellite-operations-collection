@@ -105,8 +105,8 @@ branding:
 	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
 	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade
-	[ -d roles/foreman_proxy_certs_generate ] && mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate || echo ''
-	rm -rf roles/*/molecule/default
+	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate
+	rm -rf roles/*/molecule/default roles/*/molecule/debian roles/*/molecule/redhat
 
 FORCE:
 
