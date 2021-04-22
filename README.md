@@ -1,48 +1,26 @@
-# Foreman Operations Collection ![Build Status](https://github.com/theforeman/foreman-operations-collection/workflows/CI/badge.svg)
+# Satellite Operations Collection
 
-Ansible assets for managing Foreman operations such as install, upgrade or maintenance tasks.
-
-## Documentation
-
-A list of all assets and their documentation can be found at [theforeman.org/plugins/foreman-operations-collection](https://theforeman.org/plugins/foreman-operations-collection/).
+Ansible assets for managing Satellite operations such as install, upgrade or maintenance tasks.
 
 ## Support
 
-### Supported Foreman and plugins versions
-
-Ansible assets should support any currently stable Foreman release and the matching set of plugins.
-Some modules have additional features/arguments that are only applied when the corresponding plugin is installed.
-
-We actively test the modules against the latest stable Foreman release and the matching set of plugins.
-
-### Supported Ansible Versions
-
-The supported Ansible versions are aligned with currently maintained Ansible versions. You can find the list of maintained Ansible versions [here](https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#release-status).
-
-### Supported Python Versions
-
-Ansible only supports Python 2.7 and 3.5 (and higher). These are also the only Python versions we develop and test the modules against.
-
-### Known issues
+For support questions around this collection, please open a ticket on the [Red Hat Customer Portal](https://access.redhat.com).
 
 ## Installation
 
-There are currently two ways to use the modules in your setup: install from Ansible Galaxy or via RPM. RPM installation is planned for a future release.
+You can install this collection directly from Automation Hub.
 
-### Installation from Ansible Galaxy
+The GitHub repository serves as the source for the release and should not be used for direct installation and consumption of the collection.
 
-You can install the collection from [Ansible Galaxy](https://galaxy.ansible.com/theforeman/operations) by running `ansible-galaxy collection install theforeman.operations`.
+### Installation from Automation Hub
 
-After the installation, the assets are available as `theforeman.operations.<name>`. Please see the [Using Ansible collections documentation](https://docs.ansible.com/ansible/devel/user_guide/collections_using.html) for further details.
+You can install the collection with `ansible-galaxy collection install redhat.satellite-operations` (Ansible 2.9 and later).
 
-### Installation via RPM
+## Satellite Documentation
 
-The collection is planned to be available as `ansible-collection-theforeman-operations` from the `client` repository on `yum.theforeman.org` starting with a future Foreman release.
+The official Satellite documentation can be found in the [Product Documentation section of the Red Hat Customer Portal](https://access.redhat.com/documentation/en-us/red_hat_satellite/).
 
-After installing the RPM, you can use the modules in the same way as when they are installed directly from Ansible Galaxy.
+## Upstream
 
-## Dependencies
-
-These dependencies are required for the Ansible controller, not the Foreman server.
-
-* `PyYAML`
+This collection is based on the [`theforeman.operations`](https://github.com/theforeman/foreman-operations-collection) community collection for Foreman and Katello.
+If possible, any contributions should go directly to `theforeman.operations` from where they will flow back into this collection.

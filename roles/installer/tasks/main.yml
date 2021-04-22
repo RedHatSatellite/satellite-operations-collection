@@ -2,21 +2,21 @@
 - name: Check that necessary variables are defined
   assert:
     that:
-      - foreman_installer_scenario is defined
+      - satellite_installer_scenario is defined
 
-- name: "Install {{ foreman_installer_package }}"
+- name: "Install {{ satellite_installer_package }}"
   package:
-    name: "{{ foreman_installer_package }}"
+    name: "{{ satellite_installer_package }}"
     state: present
 
 - name: 'Run installer'
   command: >
-    {{ foreman_installer_command }}
-    --scenario {{ foreman_installer_scenario }}
-    {{ (foreman_installer_verbose|bool) | ternary("-v", "") }}
-    {{ (foreman_installer_no_colors|bool) | ternary("--no-colors", "") }}
-    {{ foreman_installer_options | join(' ') }}
+    {{ satellite_installer_command }}
+    --scenario {{ satellite_installer_scenario }}
+    {{ (satellite_installer_verbose|bool) | ternary("-v", "") }}
+    {{ (satellite_installer_no_colors|bool) | ternary("--no-colors", "") }}
+    {{ satellite_installer_options | join(' ') }}
     --detailed-exitcodes
-  register: foreman_installer_run
-  changed_when: foreman_installer_run.rc == 2
-  failed_when: foreman_installer_run.rc not in [0, 2]
+  register: satellite_installer_run
+  changed_when: satellite_installer_run.rc == 2
+  failed_when: satellite_installer_run.rc not in [0, 2]

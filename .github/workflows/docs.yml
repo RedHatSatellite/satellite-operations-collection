@@ -10,7 +10,7 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    if: github.repository == 'theforeman/foreman-operations-collection'
+    if: github.repository == 'RedHatSatellite/satellite-operations-collection'
     steps:
       - uses: actions/checkout@v2
       - name: configure git

@@ -1,0 +1,27 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Foreman is installed
+      package:
+        name: foreman
+        state: present
+
+    - name: find installer flag file
+      stat:
+        path: /etc/foreman-installer/scenarios.d/.installed
+      register: installed_file
+    - name: assert installer flag file exists
+      assert:
+        that:
+          - installed_file.stat.exists
+
+    - name: find tasks config file
+      stat:
+        path: /etc/foreman/plugins/foreman-tasks.yaml
+      register: foreman_tasks_yaml
+    - name: check tasks config file exists
+      assert:
+        that:
+          - foreman_tasks_yaml.stat.exists

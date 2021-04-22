@@ -1,6 +1,6 @@
 ---
-foreman_installer_command: foreman-installer
-foreman_installer_package: foreman-installer
-foreman_installer_verbose: true
-foreman_installer_no_colors: false
-foreman_installer_options: []
+satellite_installer_command: satellite-installer
+satellite_installer_package: satellite-installer
+satellite_installer_verbose: true
+satellite_installer_no_colors: false
+satellite_installer_options: []

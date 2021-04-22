@@ -1,0 +1,4 @@
+---
+satellite_capsule_certs_generate_options: []
+satellite_capsule_certs_generate_tarball: /root/{{ satellite_capsule_certs_generate_fqdn }}.tar.gz
+satellite_capsule_certs_generate_command: capsule-certs-generate

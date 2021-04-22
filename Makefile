@@ -3,7 +3,7 @@ NAME := $(shell python -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))
 VERSION := $(shell python -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["version"])')
 MANIFEST := build/collections/ansible_collections/$(NAMESPACE)/$(NAME)/MANIFEST.json
 
-ROLES := $(wildcard roles/*)
+ROLES := $(foreach ROLE,$(wildcard roles/*),$(filter-out roles/fake_installer_rpm, $(wildcard roles/*)))
 PLUGIN_TYPES := $(filter-out __%,$(notdir $(wildcard plugins/*)))
 METADATA := galaxy.yml LICENSE README.md requirements.txt CHANGELOG.rst
 $(foreach PLUGIN_TYPE,$(PLUGIN_TYPES),$(eval _$(PLUGIN_TYPE) := $(filter-out %__init__.py,$(wildcard plugins/$(PLUGIN_TYPE)/*.py))))
@@ -92,6 +92,21 @@ doc: $(MANIFEST)
 	done
 	antsibull-docs collection --use-current --squash-hierarchy --dest-dir ./docs/plugins $(NAMESPACE).$(NAME)
 	make -C docs html
+
+branding:
+	sed -i 's/theforeman\.operations/redhat.satellite-operations/g' changelogs/config.yaml changelogs/changelog.yaml CHANGELOG.rst roles/*/README.md roles/*/*/*.yml
+	sed -i 's/foreman.example.com/satellite.example.com/g' roles/*/README.md roles/*/*/*.yml
+	sed -i 's#theforeman/foreman-operations-collection#RedHatSatellite/satellite-operations-collection#g' .github/workflows/*.yml
+	sed -i 's/theforeman-foreman/redhat-satellite-operations/g' .github/workflows/*.yml
+	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
+	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
+	sed -i '/FOREMAN_\w/ s/FOREMAN_/SATELLITE_/g' Makefile
+	sed -i '/foreman_proxy_\w/ s/foreman_proxy_/capsule_/g' roles/*/README.md roles/*/*/*.yml
+	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml
+	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
+	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade
+	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate
+	rm -rf roles/*/molecule/default roles/*/molecule/debian roles/*/molecule/redhat
 
 FORCE:
 

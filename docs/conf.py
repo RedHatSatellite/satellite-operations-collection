@@ -20,9 +20,9 @@ sys.path.insert(0, os.path.abspath('../plugins/module_utils/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Foreman Operations Collection'
-copyright = '{}, The Foreman Project'.format(datetime.date.today().year)
-author = 'The Foreman Project'
+project = 'Red Hat Satellite Operations Collection'
+copyright = '{}, Red Hat, Inc.'.format(datetime.date.today().year)
+author = 'Red Hat, Inc.'
 
 # The short X.Y version
 version = ''
@@ -139,7 +139,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'ForemanOperations.tex', 'Foreman Operations Documentation',
-     'The Foreman Project', 'manual'),
+     'Red Hat, Inc.', 'manual'),
 ]
 
 
@@ -159,7 +159,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ForemanOperationsCollection', 'Foreman Operations Collection Documentation',
+    (master_doc, 'ForemanOperationsCollection', 'Red Hat Satellite Operations Collection Documentation',
      author, 'ForemanOperationsCollection', 'One line description of project.',
      'Miscellaneous'),
 ]
