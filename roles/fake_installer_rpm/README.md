@@ -1,2 +1,2 @@
-redhat.satellite-operations.fake_installer_rpm
+redhat.satellite_operations.fake_installer_rpm
 ==============================================
