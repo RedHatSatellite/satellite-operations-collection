@@ -14,7 +14,7 @@ The GitHub repository serves as the source for the release and should not be use
 
 ### Installation from Automation Hub
 
-You can install the collection with `ansible-galaxy collection install redhat.satellite-operations` (Ansible 2.9 and later).
+You can install the collection with `ansible-galaxy collection install redhat.satellite_operations` (Ansible 2.9 and later).
 
 ## Satellite Documentation
 

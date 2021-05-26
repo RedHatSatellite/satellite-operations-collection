@@ -1,5 +1,5 @@
 namespace: "redhat"
-name: "satellite-operations"
+name: "satellite_operations"
 description: Satellite operations tasks such as install, upgrade and maintenance
 authors:
  - "Eric D. Helms <ericdhelms@gmail.com>"

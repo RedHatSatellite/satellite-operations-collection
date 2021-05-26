@@ -1,4 +1,4 @@
-redhat.satellite-operations.capsule_certs_generate
+redhat.satellite_operations.capsule_certs_generate
 ==================================================
 
 Generates a certificate bundle for Satellite scenario

@@ -1,5 +1,5 @@
-redhat.satellite-operations.installer
-===============================
+redhat.satellite_operations.installer
+=====================================
 
 Run the satellite-installer
 
@@ -26,7 +26,7 @@ Run the installer setting the initial admin password:
 ```yaml
 - hosts: target-host
   roles:
-    - role: redhat.satellite-operations.installer
+    - role: redhat.satellite_operations.installer
       vars:
         satellite_installer_options:
           - '--foreman-initial-admin-password changeme'

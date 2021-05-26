@@ -26,6 +26,6 @@ sections:
   - Bugfixes
 - - known_issues
   - Known Issues
-title: redhat.satellite-operations
+title: redhat.satellite_operations
 trivial_section_name: trivial
 use_fqcn: true
