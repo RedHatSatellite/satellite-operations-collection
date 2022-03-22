@@ -1,0 +1,16 @@
+---
+- name: Check that necessary variables are defined
+  assert:
+    that:
+      - satellite_repositories_version is defined
+
+- name: Set OS version dependent variables
+  include_vars: "el{{ ansible_distribution_major_version }}.yml"
+
+- name: Set Satellite version dependent variables
+  include_vars: "satellite_{{ satellite_repositories_version }}.yml"
+
+- name: Configure repositories
+  community.general.rhsm_repository:
+    name: "{{ satellite_base_repositories + satellite_server_repositories }}"
+    purge: true
