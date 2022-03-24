@@ -1,15 +1,16 @@
-NAMESPACE := $(shell python -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["namespace"])')
-NAME := $(shell python -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["name"])')
-VERSION := $(shell python -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["version"])')
+PYTHON_COMMAND ?= python
+NAMESPACE := $(shell $(PYTHON_COMMAND) -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["namespace"])')
+NAME := $(shell $(PYTHON_COMMAND) -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["name"])')
+VERSION := $(shell $(PYTHON_COMMAND) -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["version"])')
 MANIFEST := build/collections/ansible_collections/$(NAMESPACE)/$(NAME)/MANIFEST.json
 
 ROLES := $(foreach ROLE,$(wildcard roles/*),$(filter-out roles/fake_installer_rpm, $(wildcard roles/*)))
 PLUGIN_TYPES := $(filter-out __%,$(notdir $(wildcard plugins/*)))
-METADATA := galaxy.yml LICENSE README.md requirements.txt CHANGELOG.rst
+METADATA := galaxy.yml LICENSE README.md meta/runtime.yml requirements.txt changelogs/changelog.yaml CHANGELOG.rst
 $(foreach PLUGIN_TYPE,$(PLUGIN_TYPES),$(eval _$(PLUGIN_TYPE) := $(filter-out %__init__.py,$(wildcard plugins/$(PLUGIN_TYPE)/*.py))))
 DEPENDENCIES := $(METADATA) $(foreach PLUGIN_TYPE,$(PLUGIN_TYPES),$(_$(PLUGIN_TYPE))) $(foreach ROLE,$(ROLES),$(filter-out $(ROLE)/molecule/%, $(wildcard $(ROLE)/*/*))) $(foreach ROLE,$(ROLES),$(ROLE)/README.md)
 
-PYTHON_VERSION = $(shell python -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
+PYTHON_VERSION = $(shell $(PYTHON_COMMAND) -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
 COLLECTION_COMMAND ?= ansible-galaxy
 SANITY_OPTS = --venv
 TEST =
@@ -41,6 +42,9 @@ info:
 	@echo " $(foreach PLUGIN_TYPE,$(PLUGIN_TYPES), $(PLUGIN_TYPE):\n $(foreach PLUGIN,$(basename $(notdir $(_$(PLUGIN_TYPE)))),   - $(PLUGIN)\n)\n)"
 
 lint: $(MANIFEST)
+	yamllint -f parsable roles
+	ansible-lint -v roles/*
+	GALAXY_IMPORTER_CONFIG=tests/galaxy-importer.cfg python -m galaxy_importer.main $(NAMESPACE)-$(NAME)-$(VERSION).tar.gz
 
 sanity: $(MANIFEST)
 	# Fake a fresh git repo for ansible-test
@@ -61,7 +65,6 @@ clean_%: FORCE $(MANIFEST)
 setup: test-setup
 
 test-setup:
-	pip install --upgrade 'pip<20'
 	pip install --upgrade -r requirements-dev.txt
 
 $(MANIFEST): $(NAMESPACE)-$(NAME)-$(VERSION).tar.gz
@@ -101,10 +104,10 @@ branding:
 	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
 	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
 	sed -i '/FOREMAN_\w/ s/FOREMAN_/SATELLITE_/g' Makefile
-	sed -i '/foreman_proxy_\w/ s/foreman_proxy_/capsule_/g' roles/*/README.md roles/*/*/*.yml
+	sed -i '/foreman_proxy_\w/ s/foreman_proxy_/satellite_capsule_/g' roles/*/README.md roles/*/*/*.yml
 	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
-	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade
+	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade roles/ansible_repositories
 	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate
 	rm -rf roles/*/molecule/default roles/*/molecule/debian roles/*/molecule/redhat
 

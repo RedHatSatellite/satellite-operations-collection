@@ -5,6 +5,22 @@ redhat.satellite-operations Release Notes
 .. contents:: Topics
 
 
+v1.0.1
+======
+
+Bugfixes
+--------
+
+- correct collection metadata, so it can be uploaded to Galaxy
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first stable release of the ``redhat.satellite_operations`` collection.
+
 v0.3.0
 ======
 

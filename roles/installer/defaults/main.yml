@@ -4,3 +4,5 @@ satellite_installer_package: satellite-installer
 satellite_installer_verbose: true
 satellite_installer_no_colors: false
 satellite_installer_options: []
+satellite_installer_locale: 'en_US.UTF-8'
+satellite_installer_timeout: 1800
