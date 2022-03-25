@@ -2,17 +2,22 @@ namespace: "redhat"
 name: "satellite_operations"
 description: Satellite operations tasks such as install, upgrade and maintenance
 authors:
- - "Eric D. Helms <ericdhelms@gmail.com>"
- - "Evgeni Golov <evgeni@golov.de>"
- - "Matthias Dellweg <2500@gmx.de>"
- - "willtome <willtome@gmail.com>"
-version: "0.3.2"
+  - "Baptiste Agasse <bagasse@redhat.com>"
+  - "Eric D. Helms <ericdhelms@gmail.com>"
+  - "Evgeni Golov <evgeni@golov.de>"
+  - "Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>"
+  - "Jeffrey van Pelt <jeff@vanpelt.one>"
+  - "Kyle Williams <kyle.williams@thetradedesk.com>"
+  - "Matthias Dellweg <2500@gmx.de>"
+  - "willtome <willtome@gmail.com>"
+version: "1.0.1"
 license:
   - "GPL-3.0-or-later"
 tags:
   - foreman
   - katello
   - satellite
+  - infrastructure
 readme: "README.md"
 homepage: "https://access.redhat.com/products/red-hat-satellite"
 repository: "https://github.com/RedHatSatellite/satellite-operations-collection"

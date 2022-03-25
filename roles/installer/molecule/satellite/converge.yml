@@ -8,6 +8,7 @@
     - role: installer
       vars:
         satellite_installer_options:
+          - '--foreman-initial-organization "Test Org"'
           - '--disable-system-checks'
     - role: installer
       vars:

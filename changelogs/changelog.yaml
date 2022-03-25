@@ -6,3 +6,13 @@ releases:
     release_date: '2021-02-11'
   0.3.0:
     release_date: '2021-04-06'
+  1.0.0:
+    changes:
+      release_summary: This is the first stable release of the ``redhat.satellite_operations``
+        collection.
+    release_date: '2022-03-22'
+  1.0.1:
+    changes:
+      bugfixes:
+      - correct collection metadata, so it can be uploaded to Galaxy
+    release_date: '2022-03-24'

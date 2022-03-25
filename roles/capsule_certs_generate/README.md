@@ -1,7 +1,7 @@
 redhat.satellite_operations.capsule_certs_generate
 ==================================================
 
-Generates a certificate bundle for Satellite scenario
+Generates a certificate bundle for Satellite Capsule scenario
 
 Role Variables
 --------------
@@ -20,7 +20,7 @@ Example Playbooks
 
 Generate a certificate bundle for the hostname proxy.example.com:
 
-```
+```yaml
 ---
 - hosts: all
   gather_facts: false
