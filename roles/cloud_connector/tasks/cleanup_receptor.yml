@@ -1,9 +1,9 @@
 ---
 - name: Identify Satellite ID from Satellite
   ansible.builtin.uri:
-    url: "{{ foreman_cloud_connector_url }}/api/settings?search=name%20%3D%20instance_id"
-    user: "{{ foreman_cloud_connector_user }}"
-    password: "{{ foreman_cloud_connector_password }}"
+    url: "{{ satellite_cloud_connector_url }}/api/settings?search=name%20%3D%20instance_id"
+    user: "{{ satellite_cloud_connector_user }}"
+    password: "{{ satellite_cloud_connector_password }}"
     return_content: true
     validate_certs: true
     force_basic_auth: true

@@ -1,4 +1,4 @@
-theforeman.operations.cloud_connector
+redhat.satellite_operations.cloud_connector
 =====================================
 
 Install and configure Red Hat Cloud Connector
@@ -8,9 +8,9 @@ Role Variables
 
 Required:
 
-- `foreman_cloud_connector_url`: The URL of the Foreman server.
-- `foreman_cloud_connector_user`: The username cloud connector will use to talk to Foreman API.
-- `foreman_cloud_connector_password`: The password cloud connector will use to talk to Foreman API.
+- `satellite_cloud_connector_url`: The URL of the Satellite server.
+- `satellite_cloud_connector_user`: The username cloud connector will use to talk to Satellite API.
+- `satellite_cloud_connector_password`: The password cloud connector will use to talk to Satellite API.
 
 Example Playbooks
 -----------------
@@ -21,9 +21,9 @@ Configure Cloud Connector:
 ```yaml
 - hosts: target-host
   roles:
-    - role: theforeman.operations.cloud_connector
+    - role: redhat.satellite_operations.cloud_connector
       vars:
-        foreman_cloud_connector_url: https://foreman.example.com
-        foreman_cloud_connector_user: admin
-        foreman_cloud_connector_password: changeme
+        satellite_cloud_connector_url: https://satellite.example.com
+        satellite_cloud_connector_user: admin
+        satellite_cloud_connector_password: changeme
 ```

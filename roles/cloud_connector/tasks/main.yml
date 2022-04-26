@@ -17,7 +17,7 @@
 - name: Configure rhc-cloud-connector-worker
   ansible.builtin.template:
     src: "foreman_rh_cloud.toml.j2"
-    dest: "{{ foreman_cloud_connector_config_file }}"
+    dest: "{{ satellite_cloud_connector_config_file }}"
     owner: root
     group: root
     mode: 0640
@@ -28,7 +28,7 @@
     content: |
       #!/bin/bash
 
-      CONFIG_FILE="{{ foreman_cloud_connector_config_file }}" exec /usr/libexec/yggdrasil-worker-forwarder
+      CONFIG_FILE="{{ satellite_cloud_connector_config_file }}" exec /usr/libexec/yggdrasil-worker-forwarder
     owner: root
     group: root
     mode: 0755
@@ -45,14 +45,14 @@
 
 - name: Set client ID in Satellite
   ansible.builtin.uri:
-    url: "{{ foreman_cloud_connector_url }}/api/settings/rhc_instance_id"
-    user: "{{ foreman_cloud_connector_user }}"
-    password: "{{ foreman_cloud_connector_password }}"
+    url: "{{ satellite_cloud_connector_url }}/api/settings/rhc_instance_id"
+    user: "{{ satellite_cloud_connector_user }}"
+    password: "{{ satellite_cloud_connector_password }}"
     body:
       setting:
         value: "{{ client_id }}"
     method: "PUT"
-    validate_certs: "{{ foreman_cloud_connector_validate_certs }}"
+    validate_certs: "{{ satellite_cloud_connector_validate_certs }}"
     force_basic_auth: true
     body_format: json
   vars:
