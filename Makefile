@@ -102,9 +102,11 @@ branding:
 	sed -i 's/theforeman-foreman/redhat-satellite-operations/g' .github/workflows/*.yml
 	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
 	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
+	sed -i 's/Foreman/Satellite/g' roles/*/README.md roles/*/*/*.yml
 	sed -i '/FOREMAN_\w/ s/FOREMAN_/SATELLITE_/g' Makefile
 	sed -i '/foreman_proxy_\w/ s/foreman_proxy_/satellite_capsule_/g' roles/*/README.md roles/*/*/*.yml
-	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml
+	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml roles/*/*/*.j2
+	sed -i 's/satellite_rh_cloud/foreman_rh_cloud/g' roles/*/README.md roles/*/*/*.yml roles/*/*/*.j2
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
 	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade roles/ansible_repositories
 	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate

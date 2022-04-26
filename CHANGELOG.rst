@@ -5,6 +5,14 @@ redhat.satellite-operations Release Notes
 .. contents:: Topics
 
 
+v1.1.0
+======
+
+Minor Changes
+-------------
+
+- cloud_connector - new role for installing Cloud Connector
+
 v1.0.2
 ======
 
