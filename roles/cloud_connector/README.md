@@ -12,6 +12,10 @@ Required:
 - `satellite_cloud_connector_user`: The username cloud connector will use to talk to Satellite API.
 - `satellite_cloud_connector_password`: The password cloud connector will use to talk to Satellite API.
 
+Optional:
+
+- `foreman_cloud_connector_http_proxy`: HTTP proxy for RHC to use
+
 Example Playbooks
 -----------------
 
