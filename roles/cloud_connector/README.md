@@ -14,7 +14,7 @@ Required:
 
 Optional:
 
-- `foreman_cloud_connector_http_proxy`: HTTP proxy for RHC to use
+- `satellite_cloud_connector_http_proxy`: HTTP proxy for RHC to use
 
 Example Playbooks
 -----------------

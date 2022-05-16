@@ -60,7 +60,7 @@
 
 - name: Configure HTTP proxy
   include: http_proxy.yml
-  when: foreman_cloud_connector_http_proxy is defined
+  when: satellite_cloud_connector_http_proxy is defined
 
 - name: Cleanup receptor
   include: cleanup_receptor.yml
