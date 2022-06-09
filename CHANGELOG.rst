@@ -5,6 +5,14 @@ redhat.satellite-operations Release Notes
 .. contents:: Topics
 
 
+v1.2.2
+======
+
+Bugfixes
+--------
+
+- cloud_connector role - use a regular expression to parse the CN from the cert
+
 v1.2.1
 ======
 
