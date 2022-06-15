@@ -1,9 +1,17 @@
 =========================================
-redhat.satellite-operations Release Notes
+redhat.satellite_operations Release Notes
 =========================================
 
 .. contents:: Topics
 
+
+v1.2.3
+======
+
+Bugfixes
+--------
+
+- cloud_connector role - use correct hostname variable when talking to console.redhat.com
 
 v1.2.2
 ======
