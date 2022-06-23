@@ -1,0 +1,10 @@
+---
+satellite_base_repositories:
+  - rhel-8-for-x86_64-baseos-rpms
+  - rhel-8-for-x86_64-appstream-rpms
+  - satellite-maintenance-{{ satellite_repositories_maintenance_version }}-for-rhel-8-x86_64-rpms
+  - ansible-{{ satellite_repositories_ansible_version }}-for-rhel-8-x86_64-rpms
+satellite_server_repositories:
+  - satellite-{{ satellite_repositories_version }}-for-rhel-8-x86_64-rpms
+satellite_capsule_repositories:
+  - satellite-capsule-{{ satellite_repositories_version }}-for-rhel-8-x86_64-rpms

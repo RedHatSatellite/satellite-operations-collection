@@ -1,0 +1,10 @@
+---
+satellite_base_repositories:
+  - rhel-7-server-rpms
+  - rhel-server-rhscl-7-rpms
+  - rhel-7-server-satellite-maintenance-{{ satellite_repositories_maintenance_version }}-rpms
+  - rhel-7-server-ansible-{{ satellite_repositories_ansible_version }}-rpms
+satellite_server_repositories:
+  - rhel-7-server-satellite-{{ satellite_repositories_version }}-rpms
+satellite_capsule_repositories:
+  - rhel-7-server-satellite-capsule-{{ satellite_repositories_version }}-rpms
