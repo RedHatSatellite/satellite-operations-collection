@@ -1,14 +1,14 @@
 ---
-- name: verify
+- name: Verify
   hosts: all
   gather_facts: false
   tasks:
-    - name: find tasks config file
-      stat:
+    - name: Find proxy certs file
+      ansible.builtin.stat:
         path: /root/proxy.example.com.tar.gz
       register: cert_tarball
 
-    - name: check tasks config file exists
-      assert:
+    - name: Check proxy certs file exists
+      ansible.builtin.assert:
         that:
           - cert_tarball.stat.exists

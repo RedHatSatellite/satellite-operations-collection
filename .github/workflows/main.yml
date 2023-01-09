@@ -9,20 +9,23 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
         python:
-          - "3.8"
+          - "3.9"
         ansible:
-          - stable-2.9
-          - stable-2.10
           - stable-2.11
           - stable-2.12
           - stable-2.13
+          - stable-2.14
           - devel
         include:
+          - python: "3.8"
+            ansible: "stable-2.9"
+          - python: "3.8"
+            ansible: "stable-2.10"
           - python: "2.7"
             ansible: "stable-2.11"
           - python: "3.5"
@@ -31,9 +34,9 @@ jobs:
             ansible: "stable-2.11"
           - python: "3.7"
             ansible: "stable-2.11"
-          - python: "3.9"
-            ansible: "devel"
           - python: "3.10"
+            ansible: "devel"
+          - python: "3.11"
             ansible: "devel"
     steps:
       - uses: actions/checkout@v3
@@ -41,25 +44,17 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-      - name: Restore pip cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: 'pip'
+          cache-dependency-path: '**/requirements*.txt'
       - name: Install libyaml-dev for PyYAML
         run: sudo apt-get install -y libyaml-dev
       - name: Install Ansible
         run: pip install --upgrade https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
       - name: Install dependencies
         run: make test-setup
-      - name: Install required collections for ansible-base (2.10+)
-        run: ansible-galaxy collection install community.general
-        if: matrix.ansible != 'stable-2.9'
       - name: Run sanity tests
         run: make SANITY_OPTS="--local" sanity
-        if: matrix.ansible != 'stable-2.9'
+        if: matrix.ansible != 'stable-2.9' && matrix.ansible != 'stable-2.10' && matrix.ansible != 'stable-2.11'
 
   docs:
     runs-on: ubuntu-latest
@@ -68,14 +63,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-      - name: Restore pip cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: "3.9"
+          cache: 'pip'
+          cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
         run: make doc-setup
       - name: Build docs
@@ -93,14 +83,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-      - name: Restore pip cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: "3.9"
+          cache: 'pip'
+          cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
         run: |
           pip install --upgrade ansible-core
@@ -116,26 +101,35 @@ jobs:
           path: theforeman-operations-*.tar.gz
 
   molecule:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
+        python:
+          - "3.9"
         ansible:
-          - stable-2.9
-          - stable-2.10
           - stable-2.11
           - stable-2.12
           - stable-2.13
+          - stable-2.14
           - devel
+        include:
+          - python: "3.8"
+            ansible: "stable-2.9"
+          - python: "3.8"
+            ansible: "stable-2.10"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: ${{ matrix.python }}
       - name: Install Ansible
         run: pip install --upgrade https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
       - name: Install dependencies
         run: make test-setup
+      - name: Install Ansible 2.9 compatible molecule
+        run: pip install --upgrade 'molecule[docker,lint]<4.0'
+        if: matrix.ansible == 'stable-2.9'
       - name: Run tests
         env:
           DRIVER_NAME: docker
@@ -148,7 +142,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
