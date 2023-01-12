@@ -1,4 +1,3 @@
 ---
-skip_list:
-  - role-name
-  - line-length
+enable_list:
+  - only-builtins

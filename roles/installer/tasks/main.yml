@@ -1,20 +1,21 @@
 ---
 - name: Check that necessary variables are defined
-  assert:
+  ansible.builtin.assert:
     that:
       - satellite_installer_scenario is defined
 
-- when:
+- name: Enable the ruby module
+  when:
     - ansible_distribution_major_version == '8'
     - ansible_os_family == 'RedHat'
   block:
     - name: Get satellite-installer version
-      dnf:
+      ansible.builtin.dnf:
         list: satellite-installer
       register: package_info
 
     - name: Enable ruby:2.7 module
-      dnf:
+      ansible.builtin.dnf:
         name: '@ruby:2.7'
         state: present
       when:
@@ -22,21 +23,21 @@
 
 # This is a workaround for https://projects.theforeman.org/issues/34468
 - name: "Install hostname"
-  package:
+  ansible.builtin.package:
     name: hostname
     state: present
 
 - name: "Install {{ satellite_installer_package }}"
-  package:
+  ansible.builtin.package:
     name: "{{ satellite_installer_package }}"
     state: present
 
 - name: Run installer
-  command: >
+  ansible.builtin.command: >
     {{ satellite_installer_command }}
     --scenario {{ satellite_installer_scenario }}
-    {{ (satellite_installer_verbose|bool) | ternary("-v", "") }}
-    {{ (satellite_installer_no_colors|bool) | ternary("--no-colors", "") }}
+    {{ (satellite_installer_verbose | bool) | ternary("-v", "") }}
+    {{ (satellite_installer_no_colors | bool) | ternary("--no-colors", "") }}
     {{ satellite_installer_options | join(' ') }}
     --detailed-exitcodes
   async: "{{ ansible_check_mode | ternary(0, satellite_installer_timeout) }}"  # avoid connection timeouts
@@ -48,7 +49,7 @@
     LANG: "{{ satellite_installer_locale }}"
 
 - name: Check async status for satellite-installer
-  async_status:
+  ansible.builtin.async_status:
     jid: "{{ async_results.ansible_job_id }}"
   register: async_poll_results
   until: async_poll_results.finished

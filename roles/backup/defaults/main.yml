@@ -1,0 +1,4 @@
+---
+satellite_backup_destination: /var/backup/foreman
+satellite_backup_type: online
+satellite_backup_keep_full: 2

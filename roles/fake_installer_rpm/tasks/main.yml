@@ -1,24 +1,24 @@
 ---
 - name: Install rpmbuild and dependencies
-  package:
+  ansible.builtin.package:
     name:
       - rpm-build
       - createrepo
       - rpmdevtools
 
 - name: Create directory structure for rpmbuild
-  shell: rpmdev-setuptree  # noqa command-instead-of-shell
+  ansible.builtin.shell: rpmdev-setuptree  # noqa command-instead-of-shell
   args:
     creates: "{{ ansible_env.HOME }}/rpmbuild"
 
 - name: Copy spec file to destination
-  template:
+  ansible.builtin.template:
     src: satellite-installer.spec.j2
     dest: "{{ ansible_env.HOME }}/rpmbuild/SPECS/satellite-installer.spec"
     mode: 0644
 
 - name: Build satellite-installer RPM
-  shell: "rpmbuild -ba SPECS/satellite-installer.spec"  # noqa command-instead-of-shell
+  ansible.builtin.shell: "rpmbuild -ba SPECS/satellite-installer.spec"  # noqa command-instead-of-shell
   args:
     chdir: "{{ ansible_env.HOME }}/rpmbuild"
   register: build_result
@@ -27,7 +27,7 @@
     - molecule-idempotence-notest
 
 - name: Copy satellite-installer RPM to local repo
-  copy:
+  ansible.builtin.copy:
     src: "{{ ansible_env.HOME }}/rpmbuild/RPMS/x86_64/"
     dest: "{{ fake_installer_rpm_repo }}"
     remote_src: true
@@ -36,13 +36,13 @@
     - molecule-idempotence-notest
 
 - name: Create a local repository
-  command: "createrepo --update {{ fake_installer_rpm_repo }}"
+  ansible.builtin.command: "createrepo --update {{ fake_installer_rpm_repo }}"
   changed_when: true
   tags:
     - molecule-idempotence-notest
 
 - name: Create yumrepo
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: fake-installer-rpm
     description: Local repository for satellite-installer fake RPM
     baseurl: "file://{{ fake_installer_rpm_repo }}"

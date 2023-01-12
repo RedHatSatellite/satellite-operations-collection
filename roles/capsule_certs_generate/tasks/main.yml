@@ -1,6 +1,6 @@
 ---
 - name: 'Generate certificates for a Satellite Capsule'
-  command: |
+  ansible.builtin.command: |
     {{ satellite_capsule_certs_generate_command }}
     --foreman-proxy-fqdn {{ satellite_capsule_certs_generate_fqdn }}
     --certs-tar {{ satellite_capsule_certs_generate_tarball }}
