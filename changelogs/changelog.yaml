@@ -65,3 +65,11 @@ releases:
       minor_changes:
       - new role to configure backups using ``foreman-maintain``
     release_date: '2023-01-04'
+  2.0.0:
+    changes:
+      minor_changes:
+      - cloud_connector role - don't mark proxy.conf systemd drop-in word-inaccessible,
+        there is no benefit and systemd warns about this (https://bugzilla.redhat.com/show_bug.cgi?id=2169682)
+    fragments:
+    - bz2169682-world-inaccessible.yml
+    release_date: '2023-05-08'

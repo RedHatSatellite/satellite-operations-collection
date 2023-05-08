@@ -10,8 +10,6 @@ Role Variables
 * `satellite_backup_type`: Backup type, can be either `online` or `offline`, defaults to `online`
 * `satellite_backup_keep_full`: How many full (weekly) backups to keep, defaults to `2`
 
-None
-
 Example Playbooks
 -----------------
 

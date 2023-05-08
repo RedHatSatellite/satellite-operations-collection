@@ -31,6 +31,7 @@ Run the installer with the `satellite` scenario, setting the initial organizatio
     - role: redhat.satellite_operations.installer
       vars:
         satellite_installer_scenario: satellite
+        satellite_installer_package: satellite-installer
         satellite_installer_options:
           - '--foreman-initial-organization "ACME Inc"'
           - '--foreman-initial-admin-password changeme'
