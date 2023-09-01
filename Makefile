@@ -112,6 +112,7 @@ branding:
 	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml roles/*/*/*.j2
 	sed -i 's/satellite_rh_cloud/foreman_rh_cloud/g' roles/*/README.md roles/*/*/*.yml roles/*/*/*.j2
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
+	sed -i 's/foreman/satellite/' .ansible-lint
 	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade roles/ansible_repositories
 	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate
 	rm -rf roles/*/molecule/default roles/*/molecule/debian roles/*/molecule/redhat
