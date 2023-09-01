@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: collection
-          path: theforeman-operations-*.tar.gz
+          path: redhat-satellite_operations-*.tar.gz
 
   molecule:
     runs-on: ubuntu-20.04

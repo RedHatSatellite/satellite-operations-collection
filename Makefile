@@ -103,7 +103,7 @@ branding:
 	sed -i 's/foreman.example.com/satellite.example.com/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/katello/satellite/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's#theforeman/foreman-operations-collection#RedHatSatellite/satellite-operations-collection#g' .github/workflows/*.yml
-	sed -i 's/theforeman-foreman/redhat-satellite-operations/g' .github/workflows/*.yml
+	sed -i 's/theforeman-operations/redhat-satellite_operations/g' .github/workflows/*.yml
 	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
 	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
 	sed -i 's/Foreman/Satellite/g' roles/*/README.md roles/*/*/*.yml
