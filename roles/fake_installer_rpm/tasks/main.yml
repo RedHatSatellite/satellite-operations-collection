@@ -15,13 +15,12 @@
   ansible.builtin.template:
     src: satellite-installer.spec.j2
     dest: "{{ ansible_env.HOME }}/rpmbuild/SPECS/satellite-installer.spec"
-    mode: 0644
+    mode: '0644'
 
 - name: Build satellite-installer RPM
   ansible.builtin.shell: "rpmbuild -ba SPECS/satellite-installer.spec"  # noqa command-instead-of-shell
   args:
     chdir: "{{ ansible_env.HOME }}/rpmbuild"
-  register: build_result
   changed_when: true
   tags:
     - molecule-idempotence-notest
@@ -29,14 +28,14 @@
 - name: Copy satellite-installer RPM to local repo
   ansible.builtin.copy:
     src: "{{ ansible_env.HOME }}/rpmbuild/RPMS/x86_64/"
-    dest: "{{ fake_installer_rpm_repo }}"
+    dest: "{{ satellite_fake_installer_rpm_repo }}"
     remote_src: true
-    mode: 0644
+    mode: '0644'
   tags:
     - molecule-idempotence-notest
 
 - name: Create a local repository
-  ansible.builtin.command: "createrepo --update {{ fake_installer_rpm_repo }}"
+  ansible.builtin.command: "createrepo --update {{ satellite_fake_installer_rpm_repo }}"
   changed_when: true
   tags:
     - molecule-idempotence-notest
@@ -45,6 +44,6 @@
   ansible.builtin.yum_repository:
     name: fake-installer-rpm
     description: Local repository for satellite-installer fake RPM
-    baseurl: "file://{{ fake_installer_rpm_repo }}"
+    baseurl: "file://{{ satellite_fake_installer_rpm_repo }}"
     enabled: true
     gpgcheck: false

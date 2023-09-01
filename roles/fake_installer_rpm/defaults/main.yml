@@ -1,2 +1,2 @@
 ---
-fake_installer_rpm_repo: "/tmp/fake-installer-repo"
+satellite_fake_installer_rpm_repo: "/tmp/fake-installer-repo"
