@@ -1,6 +1,10 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * *'
 
 env:
   COLORTERM: 'yes'
@@ -14,9 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         python:
-          - "3.9"
+          - "3.10"
         ansible:
-          - stable-2.11
           - stable-2.12
           - stable-2.13
           - stable-2.14
@@ -24,19 +27,9 @@ jobs:
           - devel
         include:
           - python: "3.8"
-            ansible: "stable-2.9"
-          - python: "3.8"
-            ansible: "stable-2.10"
-          - python: "2.7"
-            ansible: "stable-2.11"
-          - python: "3.5"
-            ansible: "stable-2.11"
-          - python: "3.6"
-            ansible: "stable-2.11"
-          - python: "3.7"
-            ansible: "stable-2.11"
-          - python: "3.10"
-            ansible: "devel"
+            ansible: "stable-2.12"
+          - python: "3.9"
+            ansible: "stable-2.13"
           - python: "3.11"
             ansible: "devel"
     steps:
@@ -55,7 +48,6 @@ jobs:
         run: make test-setup
       - name: Run sanity tests
         run: make SANITY_OPTS="--local" sanity
-        if: matrix.ansible != 'stable-2.9' && matrix.ansible != 'stable-2.10' && matrix.ansible != 'stable-2.11'
 
   docs:
     runs-on: ubuntu-latest
@@ -64,7 +56,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.11"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
@@ -77,6 +69,21 @@ jobs:
           name: docs-html
           path: docs/_build/html/
 
+  galaxy-importer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: '**/requirements*.txt'
+      - name: Install dependencies
+        run: pip install --upgrade py galaxy-importer
+      - name: Run galaxy-importer
+        run: make galaxy-importer
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +91,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.11"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
@@ -107,9 +114,8 @@ jobs:
       fail-fast: false
       matrix:
         python:
-          - "3.9"
+          - "3.10"
         ansible:
-          - stable-2.11
           - stable-2.12
           - stable-2.13
           - stable-2.14
@@ -120,6 +126,8 @@ jobs:
             ansible: "stable-2.9"
           - python: "3.8"
             ansible: "stable-2.10"
+          - python: "3.9"
+            ansible: "stable-2.11"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -145,7 +153,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.11"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
