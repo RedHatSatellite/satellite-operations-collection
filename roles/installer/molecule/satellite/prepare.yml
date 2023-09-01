@@ -3,12 +3,12 @@
   hosts: all
   gather_facts: true
   become: true
-  vars:
-    foreman_repositories_version: "3.2"
-    foreman_repositories_katello_version: "4.4"
   roles:
     - theforeman.operations.puppet_repositories
-    - theforeman.operations.foreman_repositories
+    - role: theforeman.operations.foreman_repositories
+      vars:
+        foreman_repositories_version: "3.2"
+        foreman_repositories_katello_version: "4.4"
     - fake_installer_rpm
   tasks:
     - name: Ensure langpacks on EL8

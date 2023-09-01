@@ -4,8 +4,8 @@
   gather_facts: true
   become: true
   roles:
-    - role: theforeman.operations.puppet_repositories
+    - theforeman.operations.puppet_repositories
+    - role: theforeman.operations.foreman_repositories
       vars:
         foreman_repositories_version: "2.4"
         foreman_repositories_katello_version: "4.0"
-    - theforeman.operations.foreman_repositories
