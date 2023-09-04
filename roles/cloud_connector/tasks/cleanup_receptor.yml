@@ -13,11 +13,11 @@
   ansible.builtin.find:
     paths: /etc/receptor
     file_type: directory
-  register: receptor_configs
+  register: __satellite_receptor_configs
 
 - name: Delete sources
   ansible.builtin.include_tasks: delete_source.yml
-  loop: "{{ receptor_configs['files'] }}"
+  loop: "{{ __satellite_receptor_configs['files'] }}"
 
 - name: Collect service facts
   ansible.builtin.service_facts:

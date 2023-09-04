@@ -73,3 +73,5 @@ releases:
     fragments:
     - bz2169682-world-inaccessible.yml
     release_date: '2023-05-08'
+  2.1.0:
+    release_date: '2023-09-01'

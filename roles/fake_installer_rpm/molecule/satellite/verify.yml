@@ -3,18 +3,18 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: satellite-installer RPM can be installed
-      package:
+    - name: Install satellite-installer RPM
+      ansible.builtin.package:
         name: satellite-installer
         state: present
 
-    - name: find satellite-installer symlink
-      stat:
+    - name: Find satellite-installer symlink
+      ansible.builtin.stat:
         path: /usr/sbin/satellite-installer
       register: satellite_installer
 
-    - name: check satellite-installer symlink exists
-      assert:
+    - name: Check satellite-installer symlink exists
+      ansible.builtin.assert:
         that:
           - satellite_installer.stat.exists
           - satellite_installer.stat.islnk

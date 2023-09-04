@@ -43,6 +43,9 @@ info:
 
 lint: $(MANIFEST)
 	yamllint -f parsable roles
+	ansible-lint -v roles/*
+
+galaxy-importer: $(MANIFEST)
 	GALAXY_IMPORTER_CONFIG=tests/galaxy-importer.cfg python -m galaxy_importer.main $(NAMESPACE)-$(NAME)-$(VERSION).tar.gz
 
 sanity: $(MANIFEST)
@@ -100,7 +103,7 @@ branding:
 	sed -i 's/foreman.example.com/satellite.example.com/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/katello/satellite/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's#theforeman/foreman-operations-collection#RedHatSatellite/satellite-operations-collection#g' .github/workflows/*.yml
-	sed -i 's/theforeman-foreman/redhat-satellite-operations/g' .github/workflows/*.yml
+	sed -i 's/theforeman-operations/redhat-satellite_operations/g' .github/workflows/*.yml
 	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
 	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
 	sed -i 's/Foreman/Satellite/g' roles/*/README.md roles/*/*/*.yml
@@ -109,6 +112,7 @@ branding:
 	sed -i '/foreman_\w/ s/foreman_/satellite_/g' roles/*/README.md roles/*/*/*.yml roles/*/*/*.j2
 	sed -i 's/satellite_rh_cloud/foreman_rh_cloud/g' roles/*/README.md roles/*/*/*.yml roles/*/*/*.j2
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
+	sed -i 's/foreman/satellite/' .ansible-lint
 	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade roles/ansible_repositories
 	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate
 	rm -rf roles/*/molecule/default roles/*/molecule/debian roles/*/molecule/redhat
