@@ -6,10 +6,10 @@
   tasks:
     - name: Configure Puppet repositories
       ansible.builtin.include_role:
-        name: puppet_repositories
+        name: theforeman.operations.puppet_repositories
     - name: Configure Foreman repositories
       ansible.builtin.include_role:
-        name: foreman_repositories
+        name: theforeman.operations.foreman_repositories
       vars:
         foreman_repositories_version: "3.8"
         foreman_repositories_katello_version: "4.10"

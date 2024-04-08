@@ -5,7 +5,7 @@
   tasks:
     - name: Configure Foreman rpeositories
       ansible.builtin.include_role:
-        name: foreman_repositories
+        name: theforeman.operations.foreman_repositories
       vars:
         foreman_repositories_version: 'nightly'
 
