@@ -3,14 +3,19 @@
   hosts: all
   gather_facts: true
   become: true
-  roles:
-    - theforeman.operations.puppet_repositories
-    - role: theforeman.operations.foreman_repositories
+  tasks:
+    - name: Configure Puppet repositories
+      ansible.builtin.include_role:
+        name: theforeman.operations.puppet_repositories
+    - name: Configure Foreman repositories  # noqa: var-naming[pattern]
+      ansible.builtin.include_role:
+        name: theforeman.operations.foreman_repositories
       vars:
         foreman_repositories_version: "3.2"
         foreman_repositories_katello_version: "4.4"
-    - fake_installer_rpm
-  tasks:
+    - name: Setup fake installer
+      ansible.builtin.include_role:
+        name: fake_installer_rpm
     - name: Ensure langpacks on EL8
       ansible.builtin.dnf:
         name: glibc-langpack-en

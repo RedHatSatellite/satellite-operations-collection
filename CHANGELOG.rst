@@ -4,6 +4,15 @@ redhat.satellite_operations Release Notes
 
 .. contents:: Topics
 
+v3.0.0
+======
+
+Minor Changes
+-------------
+
+- cloud_connector role - Remove receptor cleanup steps in configure cloud connector
+- cloud_connector role - Restart rhcd after writing out config file
+- metrics role - new role to setup PCP integration with Foreman 3.9 and newer
 
 v2.1.0
 ======

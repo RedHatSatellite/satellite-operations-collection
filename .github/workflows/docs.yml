@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'RedHatSatellite/satellite-operations-collection'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: configure git
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@bots.github.com"
           git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install dependencies

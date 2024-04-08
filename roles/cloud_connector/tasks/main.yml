@@ -21,6 +21,8 @@
     owner: root
     group: root
     mode: '0640'
+  notify:
+    - Restart rhcd
 
 - name: Create rhcd worker
   ansible.builtin.copy:
@@ -63,6 +65,3 @@
 - name: Configure HTTP proxy
   ansible.builtin.include_tasks: http_proxy.yml
   when: satellite_cloud_connector_http_proxy is defined
-
-- name: Cleanup receptor
-  ansible.builtin.include_tasks: cleanup_receptor.yml

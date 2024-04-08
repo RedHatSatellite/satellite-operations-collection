@@ -75,3 +75,17 @@ releases:
     release_date: '2023-05-08'
   2.1.0:
     release_date: '2023-09-01'
+  3.0.0:
+    changes:
+      minor_changes:
+      - cloud_connector role - Remove receptor cleanup steps in configure cloud connector
+      - cloud_connector role - Restart rhcd after writing out config file
+      - metrics role - new role to setup PCP integration with Foreman 3.9 and newer
+    fragments:
+    - add-metrics-role.yml
+    - drop-default-repo.yml
+    - drop-el7.yml
+    - drop-foreman-pre-3.2.yml
+    - drop-postgresql_upgrade-role.yml
+    - pulpcore-module-only-up-to-410.yml
+    release_date: '2024-04-08'
