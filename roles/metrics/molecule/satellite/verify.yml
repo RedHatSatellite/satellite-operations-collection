@@ -11,19 +11,19 @@
     - name: Read pmcd.conf
       ansible.builtin.slurp:
         src: /etc/pcp/pmcd/pmcd.conf
-      register: __foreman_pmcd_conf
+      register: __satellite_pmcd_conf
 
     - name: Ensure optional metric collection agents are enabled
       ansible.builtin.assert:
         that:
-          - item in __foreman_pmcd_enabled_pmdas
+          - item in __satellite_pmcd_enabled_pmdas
       loop:
         - apache
         - openmetrics
         - postgresql
         - redis
       vars:
-        __foreman_pmcd_enabled_pmdas: "{{ __foreman_pmcd_conf['content'] | b64decode | split('\n') | select('contains', 'pcp/pmdas') | map('split') | map('first') }}"
+        __satellite_pmcd_enabled_pmdas: "{{ __satellite_pmcd_conf['content'] | b64decode | split('\n') | select('contains', 'pcp/pmdas') | map('split') | map('first') }}"
 
     - name: Ensure Grafana is installed
       ansible.builtin.package:
@@ -38,9 +38,9 @@
     - name: List installed Grafana plugins
       ansible.builtin.command: grafana-cli plugins ls
       changed_when: false
-      register: __foreman_grafana_plugins
+      register: __satellite_grafana_plugins
 
     - name: Ensure PCP plugin is installed
       ansible.builtin.assert:
         that:
-          - "'performancecopilot-pcp-app' in __foreman_grafana_plugins.stdout"
+          - "'performancecopilot-pcp-app' in __satellite_grafana_plugins.stdout"
