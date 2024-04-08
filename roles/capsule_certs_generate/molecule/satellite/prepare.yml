@@ -13,6 +13,9 @@
       vars:
         foreman_repositories_version: "3.8"
         foreman_repositories_katello_version: "4.10"
+    - name: Setup fake installer
+      ansible.builtin.include_role:
+        name: fake_installer_rpm
     - name: Ensure langpacks on EL8
       ansible.builtin.dnf:
         name: glibc-langpack-en
