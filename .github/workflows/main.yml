@@ -25,10 +25,6 @@ jobs:
           - stable-2.16
           - devel
         include:
-          - python: "3.8"
-            ansible: "stable-2.12"
-          - python: "3.9"
-            ansible: "stable-2.13"
           - python: "3.10"
             ansible: "stable-2.14"
           - python: "3.12"
@@ -120,17 +116,6 @@ jobs:
           - stable-2.14
           - stable-2.15
           - stable-2.16
-        include:
-          - python: "3.8"
-            ansible: "v2.9.17"
-          - python: "3.8"
-            ansible: "stable-2.10"
-          - python: "3.9"
-            ansible: "stable-2.11"
-          - python: "3.9"
-            ansible: "stable-2.12"
-          - python: "3.9"
-            ansible: "stable-2.13"
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -141,9 +126,6 @@ jobs:
         run: pip install --upgrade https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
       - name: Install dependencies
         run: make test-setup
-      - name: Install Ansible 2.9 compatible molecule and Jinja
-        run: pip install --upgrade 'molecule[docker,lint]<4.0' 'Jinja2<3.1'
-        if: matrix.ansible == 'v2.9.17'
       - name: Run tests
         env:
           DRIVER_NAME: docker
