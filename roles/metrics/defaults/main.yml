@@ -1,0 +1,12 @@
+---
+satellite_metrics_url: "https://{{ ansible_fqdn | default('localhost') }}/metrics"
+satellite_metrics_pcp_additional_packages: "{{ ['pcp-system-tools'] if ansible_os_family == 'RedHat' else ['python3-psycopg2', 'python3-requests'] }}"
+satellite_metrics_pcp_optional_agents:
+  - apache
+  - openmetrics
+  - postgresql
+  - redis
+satellite_metrics_pcp_optional_agent_packages_redhat: "{{ satellite_metrics_pcp_optional_agents | map('regex_replace', '^', 'pcp-pmda-') }}"
+satellite_metrics_pcp_optional_agent_packages: "{{ satellite_metrics_pcp_optional_agent_packages_redhat if ansible_os_family == 'RedHat' else [] }}"
+satellite_metrics_grafana_enabled: "{{ ansible_os_family == 'RedHat' }}"
+satellite_metrics_grafana_pmproxy_url: "http://{{ ansible_fqdn | default('localhost') }}:44322"

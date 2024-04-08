@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'RedHatSatellite/satellite-operations-collection'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install Ansible
@@ -21,3 +21,7 @@ jobs:
         run: make dist
       - name: Deploy Ansible Collection
         run: make publish GALAXY_API_KEY=${{ secrets.GALAXY_API_KEY }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: redhat-satellite_operations-*.tar.gz
