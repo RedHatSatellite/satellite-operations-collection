@@ -7,7 +7,7 @@
     - name: Configure Puppet repositories
       ansible.builtin.include_role:
         name: theforeman.operations.puppet_repositories
-    - name: Configure Foreman repositories
+    - name: Configure Foreman repositories  # noqa: var-naming[pattern]
       ansible.builtin.include_role:
         name: theforeman.operations.foreman_repositories
       vars:
