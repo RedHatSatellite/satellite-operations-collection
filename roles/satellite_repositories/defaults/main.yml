@@ -1,0 +1,3 @@
+---
+satellite_repositories_type: satellite
+satellite_repositories_version: '{{ undef(hint="You must specify the Satellite version") }}'
