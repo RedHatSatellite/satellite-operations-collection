@@ -14,7 +14,7 @@ authors:
   - "Matthias Dellweg <2500@gmx.de>"
   - "Robert Rettig <robert@rettig.bayern>"
   - "willtome <willtome@gmail.com>"
-version: "3.0.0"
+version: "3.0.1"
 license:
   - "GPL-3.0-or-later"
 tags:

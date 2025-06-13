@@ -4,6 +4,14 @@ redhat.satellite_operations Release Notes
 
 .. contents:: Topics
 
+v3.0.1
+======
+
+Bugfixes
+--------
+
+- cloud_connector role - Remove protocol from NO_PROXY var (https://issues.redhat.com/browse/SAT-34224)
+
 v3.0.0
 ======
 

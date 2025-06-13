@@ -89,3 +89,8 @@ releases:
     - drop-postgresql_upgrade-role.yml
     - pulpcore-module-only-up-to-410.yml
     release_date: '2024-04-08'
+  3.0.1:
+    changes:
+      bugfixes:
+      - cloud_connector role - Remove protocol from NO_PROXY var (https://issues.redhat.com/browse/SAT-34224)
+    release_date: '2025-06-13'
