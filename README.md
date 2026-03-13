@@ -68,7 +68,7 @@ If a support case cannot be opened with Red Hat and the collection has been obta
 
 ## Release Notes and Roadmap
 
-Please see the [changelog](CHANGELOG.rst).
+Please see the [changelog](https://github.com/RedHatSatellite/satellite-operations-collection/blob/master/CHANGELOG.rst).
 
 
 ## Related Information
@@ -78,4 +78,4 @@ The official Satellite documentation can be found in the [Product Documentation 
 
 ## License Information
 
-This collection is licensed under the [GNU GPL v3](LICENSE).
+This collection is licensed under the [GNU GPL v3](https://github.com/RedHatSatellite/satellite-operations-collection/blob/master/LICENSE).
