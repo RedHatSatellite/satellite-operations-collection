@@ -2,7 +2,7 @@
 
 ## Description
 
-Ansible assets for managing Satellite operations such as install, upgrade or maintenance tasks.
+Ansible assets for managing Satellite operations such as install or maintenance tasks.
 
 ## Requirements
 
@@ -30,14 +30,13 @@ collections:
   - name: redhat.satellite_operations
 ```
 
-Note that if you install any collections from Ansible Galaxy, they will not be upgraded automatically when you upgrade the Ansible package.
 To upgrade the collection to the latest available version, run the following command:
 
 ```
 ansible-galaxy collection install redhat.satellite_operations --upgrade
 ```
 
-You can also install a specific version of the collection, for example, if you need to downgrade when something is broken in the latest version (please report an issue in this repository). Use the following syntax to install version 1.0.0:
+You can also install a specific version of the collection. Use the following syntax to install version 1.0.0:
 
 ```
 ansible-galaxy collection install redhat.satellite_operations:==1.0.0
@@ -63,7 +62,8 @@ If possible, any contributions should go directly to `theforeman.operations` fro
 
 ## Support
 
-For support questions around this collection, please open a ticket on the [Red Hat Customer Portal](https://access.redhat.com).
+As Red Hat Ansible Certified Content, this collection is entitled to support through the Ansible Automation Platform (AAP) using the **Create issue** button on the top right corner.
+If a support case cannot be opened with Red Hat and the collection has been obtained either from Galaxy or GitHub, there may community help available on the [Ansible Forum](https://forum.ansible.com/).
 
 
 ## Release Notes and Roadmap
@@ -73,7 +73,7 @@ Please see the [changelog](CHANGELOG.rst).
 
 ## Related Information
 
-The official Satellite documentation can be found in the [Product Documentation section of the Red Hat Customer Portal](https://access.redhat.com/documentation/en-us/red_hat_satellite/).
+The official Satellite documentation can be found in the [Product Documentation section of the Red Hat Customer Portal](https://docs.redhat.com/en/documentation/red_hat_satellite/).
 
 
 ## License Information
