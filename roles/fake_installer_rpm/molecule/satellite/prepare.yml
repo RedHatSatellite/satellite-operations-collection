@@ -3,9 +3,13 @@
   hosts: all
   gather_facts: true
   become: true
-  roles:
-    - theforeman.operations.puppet_repositories
-    - role: theforeman.operations.foreman_repositories
+  tasks:
+    - name: Configure Puppet repositories
+      ansible.builtin.include_role:
+        name: theforeman.operations.puppet_repositories
+    - name: Configure Foreman repositories  # noqa: var-naming[pattern]
+      ansible.builtin.include_role:
+        name: theforeman.operations.foreman_repositories
       vars:
-        foreman_repositories_version: "3.2"  # noqa: var-naming[pattern]
-        foreman_repositories_katello_version: "4.4"  # noqa: var-naming[pattern]
+        foreman_repositories_version: "3.16"
+        foreman_repositories_katello_version: "4.18"
