@@ -99,11 +99,11 @@ doc: $(MANIFEST)
 	make -C docs html
 
 branding:
-	sed -i 's/theforeman\.operations/redhat.satellite_operations/g' changelogs/config.yaml changelogs/changelog.yaml CHANGELOG.rst roles/*/README.md roles/*/*/*.yml
+	sed -i 's/theforeman\.operations/redhat.satellite_operations/g' changelogs/config.yaml changelogs/changelog.yaml CHANGELOG.rst roles/*/README.md roles/*/*/*.yml .packit.yaml
 	sed -i 's/foreman.example.com/satellite.example.com/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/katello/satellite/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's#theforeman/foreman-operations-collection#RedHatSatellite/satellite-operations-collection#g' .github/workflows/*.yml
-	sed -i 's/theforeman-operations/redhat-satellite_operations/g' .github/workflows/*.yml
+	sed -i 's/theforeman-operations/redhat-satellite_operations/g' .github/workflows/*.yml .packit.yaml
 	sed -i 's/Foreman Operations Collection/Red Hat Satellite Operations Collection/g' docs/index.rst docs/conf.py
 	sed -i 's/The Foreman Project/Red Hat, Inc./g' docs/conf.py
 	sed -i 's/Foreman/Satellite/g' roles/*/README.md roles/*/*/*.yml
@@ -114,6 +114,7 @@ branding:
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/foreman/satellite/' .ansible-lint
 	sed -i '/unsupported-version/d' .ansible-lint
+	sed -i 's#packages/plugins#packages/satellite#' .packit.yaml
 	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade roles/ansible_repositories roles/openvox_repositories
 	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate
 	rm -rf roles/*/molecule/default roles/*/molecule/debian roles/*/molecule/redhat
