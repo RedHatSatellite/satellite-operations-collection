@@ -28,3 +28,7 @@
       ansible.builtin.lineinfile:
         path: /etc/foreman-installer/custom-hiera.yaml
         line: 'foreman::register::force_fact_upload: false'
+    - name: Disable always_run_migrations
+      ansible.builtin.lineinfile:
+        path: /etc/foreman-installer/custom-hiera.yaml
+        line: 'pulpcore::database::always_run_migrations: false'
