@@ -6,6 +6,7 @@ driver:
 platforms:
   - name: centos9
     image: quay.io/centos/centos:stream9
+    command: /sbin/init
 provisioner:
   name: ansible
 verifier:
