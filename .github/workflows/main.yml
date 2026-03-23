@@ -6,54 +6,51 @@ on:
   schedule:
     - cron: '0 6 * * *'
 
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 env:
   COLORTERM: 'yes'
   TERM: 'xterm-256color'
   PYTEST_ADDOPTS: '--color=yes'
 
 jobs:
-  build:
-    runs-on: ubuntu-20.04
+  sanity:
+    name: Sanity (Ⓐ${{ matrix.ansible }})
     strategy:
-      fail-fast: false
       matrix:
-        python:
-          - "3.11"
         ansible:
-          - stable-2.14
           - stable-2.15
           - stable-2.16
+          - stable-2.17
+          - stable-2.18
+          - stable-2.19
+          - stable-2.20
           - devel
-        include:
-          - python: "3.10"
-            ansible: "stable-2.14"
-          - python: "3.12"
-            ansible: "devel"
+
+    runs-on: ubuntu-24.04
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      # Run sanity tests inside a Docker container.
+      # The docker container has all the pinned dependencies that are
+      # required and all Python versions Ansible supports.
+      - name: Perform sanity testing
+        uses: ansible-community/ansible-test-gh-action@release/v1
         with:
-          python-version: ${{ matrix.python }}
-          cache: 'pip'
-          cache-dependency-path: '**/requirements*.txt'
-      - name: Install libyaml-dev for PyYAML
-        run: sudo apt-get install -y libyaml-dev
-      - name: Install Ansible
-        run: pip install --upgrade https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
-      - name: Install dependencies
-        run: make test-setup
-      - name: Run sanity tests
-        run: make SANITY_OPTS="--local" sanity
+          ansible-core-version: ${{ matrix.ansible }}
+          testing-type: sanity
+          pull-request-change-detection: false
+          coverage: never
 
   docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
@@ -61,19 +58,19 @@ jobs:
       - name: Build docs
         run: make doc
       - name: Upload docs artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: docs-html
           path: docs/_build/html/
 
   galaxy-importer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
@@ -82,63 +79,72 @@ jobs:
         run: make galaxy-importer
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies
         run: |
           pip install --upgrade ansible-core
           pip install --upgrade -r requirements-lint.txt
-      - name: Install required collections for linting
-        run: ansible-galaxy collection install theforeman.operations
       - name: Run lint
         run: make lint
       - name: Upload collection artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: collection
           path: redhat-satellite_operations-*.tar.gz
 
   molecule:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         python:
-          - "3.11"
+          - "3.12"
         ansible:
-          - stable-2.14
           - stable-2.15
           - stable-2.16
+          - stable-2.17
+          - stable-2.18
+          - stable-2.19
+          - stable-2.20
+          - devel
+        include:
+          - python: "3.9"
+            ansible: "stable-2.12"
+          - python: "3.9"
+            ansible: "stable-2.13"
+          - python: "3.11"
+            ansible: "stable-2.14"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
-      - name: Install Ansible
-        run: pip install --upgrade https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz
-      - name: Install dependencies
-        run: make test-setup
+      - name: Install Ansible and dependencies
+        run: pip install --upgrade https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz -r requirements-dev.txt
+      - name: Install collection dependencies
+        run: cd roles/installer && molecule dependency && molecule create
       - name: Run tests
         env:
-          DRIVER_NAME: docker
-        run: ./tests/molecule.sh
+          MOLECULE_OPTS: --parallel
+        run: pytest -vv --numprocesses 4 --molecule roles/
 
   execution_environment:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
       - name: Install dependencies

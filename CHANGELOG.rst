@@ -1,8 +1,16 @@
-=========================================
-redhat.satellite_operations Release Notes
-=========================================
+==========================================
+redhat.satellite\_operations Release Notes
+==========================================
 
 .. contents:: Topics
+
+v4.0.0
+======
+
+Minor Changes
+-------------
+
+- metrics role - allow disabling pulling the OpenMetrics endpoint
 
 v3.0.1
 ======
@@ -127,3 +135,4 @@ v0.2.0
 
 v0.1.0
 ======
+

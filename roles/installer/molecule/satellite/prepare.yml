@@ -2,17 +2,15 @@
 - name: Prepare
   hosts: all
   gather_facts: true
-  become: true
   tasks:
     - name: Configure Puppet repositories
       ansible.builtin.include_role:
-        name: theforeman.operations.puppet_repositories
-    - name: Configure Foreman repositories  # noqa: var-naming[pattern]
+        name: puppet_repositories
+    - name: Configure Foreman repositories
       ansible.builtin.include_role:
-        name: theforeman.operations.foreman_repositories
+        name: foreman_repositories
       vars:
-        foreman_repositories_version: "3.2"
-        foreman_repositories_katello_version: "4.4"
+        foreman_repositories_version: "3.16"
     - name: Setup fake installer
       ansible.builtin.include_role:
         name: fake_installer_rpm
@@ -21,3 +19,11 @@
         name: glibc-langpack-en
         state: present
       when: ansible_facts['os_family'] == 'RedHat'
+    - name: Install installer
+      ansible.builtin.package:
+        name: foreman-installer
+        state: present
+    - name: Disable force_fact_upload
+      ansible.builtin.lineinfile:
+        path: /etc/foreman-installer/custom-hiera.yaml
+        line: 'foreman::register::force_fact_upload: false'

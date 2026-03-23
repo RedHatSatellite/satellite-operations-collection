@@ -6,7 +6,7 @@ MANIFEST := build/collections/ansible_collections/$(NAMESPACE)/$(NAME)/MANIFEST.
 
 ROLES := $(foreach ROLE,$(wildcard roles/*),$(filter-out roles/fake_installer_rpm, $(wildcard roles/*)))
 PLUGIN_TYPES := $(filter-out __%,$(notdir $(wildcard plugins/*)))
-METADATA := galaxy.yml LICENSE README.md meta/runtime.yml requirements.txt changelogs/changelog.yaml CHANGELOG.rst meta/execution-environment.yml
+METADATA := galaxy.yml LICENSE README.md meta/runtime.yml requirements.txt changelogs/changelog.yaml CHANGELOG.rst meta/execution-environment.yml .ansible-lint .yamllint
 $(foreach PLUGIN_TYPE,$(PLUGIN_TYPES),$(eval _$(PLUGIN_TYPE) := $(filter-out %__init__.py,$(wildcard plugins/$(PLUGIN_TYPE)/*.py))))
 DEPENDENCIES := $(METADATA) $(foreach PLUGIN_TYPE,$(PLUGIN_TYPES),$(_$(PLUGIN_TYPE))) $(foreach ROLE,$(ROLES),$(filter-out $(ROLE)/molecule/%, $(wildcard $(ROLE)/*/*))) $(foreach ROLE,$(ROLES),$(ROLE)/README.md)
 
@@ -43,7 +43,7 @@ info:
 
 lint: $(MANIFEST)
 	yamllint -f parsable roles
-	ansible-lint -v roles/*
+	ansible-lint -v
 
 galaxy-importer: $(MANIFEST)
 	GALAXY_IMPORTER_CONFIG=tests/galaxy-importer.cfg python -m galaxy_importer.main $(NAMESPACE)-$(NAME)-$(VERSION).tar.gz
@@ -113,7 +113,8 @@ branding:
 	sed -i 's/satellite_rh_cloud/foreman_rh_cloud/g' roles/*/README.md roles/*/*/*.yml roles/*/*/*.j2
 	sed -i 's/foreman-installer/satellite-installer/g' roles/*/README.md roles/*/*/*.yml
 	sed -i 's/foreman/satellite/' .ansible-lint
-	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade roles/ansible_repositories
+	sed -i '/unsupported-version/d' .ansible-lint
+	rm -rf roles/puppet_repositories roles/foreman_repositories roles/postgresql_upgrade roles/ansible_repositories roles/openvox_repositories
 	[ ! -d roles/foreman_proxy_certs_generate ] || mv roles/foreman_proxy_certs_generate roles/capsule_certs_generate
 	rm -rf roles/*/molecule/default roles/*/molecule/debian roles/*/molecule/redhat
 

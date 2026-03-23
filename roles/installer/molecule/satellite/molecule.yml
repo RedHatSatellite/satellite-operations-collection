@@ -4,19 +4,11 @@ dependency:
 driver:
   name: ${DRIVER_NAME:-podman}
 platforms:
-  - name: satellite.example.com
-    image: quay.io/centos/centos:stream8
+  - name: foreman.example.com
+    image: quay.io/centos/centos:stream9
+    hostname: foreman.example.com
     command: /sbin/init
-    tmpfs:
-      - /run
-      - /tmp:exec,mode=777
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
 provisioner:
   name: ansible
 verifier:
   name: ansible
-lint: |
-  set -e
-  yamllint -c ../../.yamllint .
-  YAMLLINT_CONFIG_FILE=../../.yamllint ansible-lint .

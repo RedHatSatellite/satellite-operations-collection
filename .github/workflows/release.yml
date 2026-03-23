@@ -5,21 +5,30 @@ on:
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
 
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.repository == 'RedHatSatellite/satellite-operations-collection'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install Ansible
-        run: pip install --upgrade ansible
+        run: pip install --upgrade ansible py antsibull-changelog
       - name: Build Ansible Collection
         run: make dist
+      - name: Build Changelog
+        run: antsibull-changelog generate --output release-changelog.txt --only-latest
+      - name: Deploy Ansible Collection
+        run: make publish GALAXY_API_KEY=${{ secrets.GALAXY_API_KEY }}
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: redhat-satellite_operations-*.tar.gz
+          body_path: release-changelog.txt

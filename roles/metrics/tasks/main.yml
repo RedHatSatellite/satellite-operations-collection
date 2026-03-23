@@ -3,7 +3,7 @@
   ansible.builtin.package:
     name: "{{ ['foreman-pcp', 'pcp'] + satellite_metrics_pcp_additional_packages + satellite_metrics_pcp_optional_agent_packages }}"
     state: present
-    disable_plugin: "{{ 'foreman-protector' if ansible_os_family == 'RedHat' else omit }}"
+    disable_plugin: "{{ 'foreman-protector' if ansible_facts['os_family'] == 'RedHat' else omit }}"
 
 - name: Read pmcd.conf
   ansible.builtin.slurp:
@@ -30,6 +30,9 @@
     dest: /var/lib/pcp/pmdas/openmetrics/config.d/foreman.url
     content: "{{ satellite_metrics_url }}"
     mode: '0644'
+  when:
+    - satellite_metrics_url is defined
+    - satellite_metrics_url != ''
   notify:
     - Restart pmcd
     - Restart pmproxy
