@@ -11,6 +11,7 @@
         name: theforeman.operations.foreman_repositories
       vars:
         foreman_repositories_version: "3.16"
+        foreman_repositories_katello_version: "4.18"
     - name: Setup fake installer
       ansible.builtin.include_role:
         name: fake_installer_rpm
