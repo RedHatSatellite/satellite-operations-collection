@@ -7,7 +7,7 @@
       ansible.builtin.include_role:
         name: theforeman.operations.foreman_repositories
       vars:
-        foreman_repositories_version: 'nightly'
+        foreman_repositories_version: '3.13'
 
     - name: Ensure langpacks on EL8
       ansible.builtin.package:
@@ -28,3 +28,9 @@
       ansible.builtin.service:
         name: postgresql
         state: started
+
+    # Workaround for https://issues.redhat.com/browse/RHEL-39491
+    - name: Install procps-ng
+      ansible.builtin.package:
+        name: procps-ng
+        state: present

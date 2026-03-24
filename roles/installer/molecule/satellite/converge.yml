@@ -9,9 +9,9 @@
       vars:
         satellite_installer_options:
           - '--foreman-initial-organization "Test Org"'
-          - '--disable-system-checks'
+          - '--tuning development'
     - role: installer
       vars:
         satellite_installer_options:
           - '--enable-foreman-plugin-tasks'
-          - '--disable-system-checks'
+          - '--tuning development'

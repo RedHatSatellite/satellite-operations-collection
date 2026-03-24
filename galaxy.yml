@@ -1,6 +1,6 @@
 namespace: "redhat"
 name: "satellite_operations"
-description: Satellite operations tasks such as install, upgrade and maintenance
+description: Satellite operations tasks such as install and maintenance
 authors:
   - "Baptiste Agasse <bagasse@redhat.com>"
   - "Chris Roberts <chrobert@redhat.com>"
@@ -12,9 +12,11 @@ authors:
   - "Jeremy Audet <audet.jeremy@pm.me>"
   - "Kyle Williams <kyle.williams@thetradedesk.com>"
   - "Matthias Dellweg <2500@gmx.de>"
+  - "Pablo Méndez Hernández <pablomh@redhat.com>"
   - "Robert Rettig <robert@rettig.bayern>"
+  - "Sayan Das <saydas@redhat.com>"
   - "willtome <willtome@gmail.com>"
-version: "3.0.1"
+version: "4.0.0"
 license:
   - "GPL-3.0-or-later"
 tags:

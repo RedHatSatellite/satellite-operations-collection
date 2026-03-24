@@ -1,13 +1,12 @@
 PyYAML
-docker
 rstcheck==3.3.1 # from https://github.com/ansible/ansible/raw/devel/test/sanity/code-smell/rstcheck.requirements.txt
 cryptography<3.1; python_version < '3.6'
 -r requirements.txt
 pylint==2.6.0; python_version >= '3.6'
 voluptuous==0.12.1 # from https://github.com/ansible/ansible/raw/devel/test/lib/ansible_test/_data/requirements/sanity.validate-modules.txt
 yamllint
-molecule[docker,lint]
-molecule-plugins[docker]; python_version >= '3.9'
-ansible-compat<4; python_version >= '3.6' # https://github.com/ansible-community/molecule/issues/3903
-ansible-lint; python_version >= '3.9'
-ansible-lint<6.12.0; python_version < '3.9'
+molecule[podman]<25.2.0
+molecule-plugins[podman]; python_version >= '3.9'
+pytest
+pytest-ansible
+pytest-xdist
