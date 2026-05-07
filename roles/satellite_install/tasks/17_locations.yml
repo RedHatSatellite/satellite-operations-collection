@@ -1,0 +1,5 @@
+---
+- name: Ensure locations are created
+  ansible.builtin.include_role:
+    name: redhat.satellite.locations
+...

@@ -1,0 +1,26 @@
+---
+# Credentials
+satellite_admin_username: admin
+satellite_admin_password: redhat123
+satellite_username: "{{ satellite_admin_username }}"
+satellite_password: "{{ satellite_admin_password }}"
+satellite_installer_verbose: True
+
+# Administration
+satellite_timezone: UTC
+satellite_data_device: /dev
+satellite_validate_certs: false
+
+# System/OS related
+satellite_min_cpu_count: 4
+# Size must be integer, MB
+satellite_min_memory_size: 20240
+# Size must be integer, GB
+satellite_data_disk_min_size: 500
+# Size must be integer, GB
+satellite_min_pulp_size: 300
+# Size must be integer, GB
+satellite_min_pgsql_size: 20
+satellite_server_basearch: "x86_64"
+satellite_os_version: "9"
+satellite_deployment_version: "6.16"

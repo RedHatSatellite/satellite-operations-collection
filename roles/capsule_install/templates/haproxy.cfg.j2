@@ -1,0 +1,56 @@
+#---------------------------------------------------------------------
+#Managed by Ansible
+#jinja2: trim_blocks:True
+defaults
+    log                     global
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+
+#https
+frontend https
+   bind *:443
+   mode tcp
+   option               tcplog
+   default_backend f-proxy-https
+
+backend f-proxy-https
+   option tcp-check
+   balance source
+   {% for host in ansible_play_hosts_all %}
+server f-proxy-https-{{ loop['index'] }}{{ hostvars[host]['ansible_fqdn'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:443 check
+   {% endfor %}
+
+#http
+frontend http
+   bind *:80
+   mode tcp
+   option               tcplog
+   default_backend f-proxy-http
+
+backend f-proxy-http
+   option tcp-check
+   balance roundrobin
+   {% for host in ansible_play_hosts_all %}
+server f-proxy-http-{{ loop['index'] }}{{ hostvars[host]['ansible_fqdn'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:80 check
+   {% endfor %}
+
+#scap
+frontend scap
+   bind *:9090
+   mode tcp
+   option               tcplog
+   default_backend f-proxy-scap
+
+backend f-proxy-scap
+   option tcp-check
+   balance roundrobin
+   {% for host in ansible_play_hosts_all %}
+server f-proxy-scap-{{ loop['index'] }}{{ hostvars[host]['ansible_fqdn'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:9090 check
+{% endfor %}

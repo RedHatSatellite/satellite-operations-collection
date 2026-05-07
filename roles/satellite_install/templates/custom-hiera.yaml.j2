@@ -1,0 +1,48 @@
+# Tuning suitable for example Satellite
+#
+# Instructions for use:
+# 1) Copy this file to /etc/foreman-installer/custom-hiera.yaml
+# 2) run 'satellite-installer' with no arguments to apply these settings
+
+apache::mod::passenger::passenger_max_pool_size: 340
+apache::mod::passenger::passenger_max_request_queue_size: 1000
+apache::mod::passenger::passenger_max_requests: 1000
+
+apache::mod::prefork::serverlimit: 1024
+apache::mod::prefork::maxclients: 1024
+apache::mod::prefork::maxrequestsperchild: 4000
+apache::mod::prefork:startservers: 24
+
+qpid::open_file_limit: 65536
+qpid::router::open_file_limit: 150100
+
+candlepin::java_opts: "-Xms1024m -Xmx8192m"
+
+postgresql::server::config_entries:
+  max_connections: 1000
+  shared_buffers: 16GB
+  work_mem: 8MB
+  # checkpoint_segments: 32
+  checkpoint_completion_target: 0.9
+  effective_cache_size: 32GB
+  autovacuum_vacuum_cost_limit: 2000
+  log_min_duration_statement: 500
+
+# Disable old SSL - TWL
+# Foreman Proxy
+foreman_proxy::tls_disabled_versions: [ '1.1' ]
+
+# Dynflow
+foreman_proxy::plugin::dynflow::tls_disabled_versions: [ '1.1' ]
+
+# Apache
+apache::mod::ssl::ssl_protocol: [ 'ALL' , '-SSLv3' , '-TLSv1' , '-TLSv1.1' , '+TLSv1.2' ]
+
+# Tomcat / Candlepin
+candlepin::tls_versions: [ '1.2' ]
+
+# QPID Dispatch
+foreman_proxy_content::qpid_router_ssl_protocols: [ 'TLSv1.2' ]
+foreman_proxy_content::qpid_router_ssl_ciphers: 'ALL:!aNULL:+HIGH:-SSLv3:!IDEA-CBC-SHA'
+
+apache::purge_configs: false

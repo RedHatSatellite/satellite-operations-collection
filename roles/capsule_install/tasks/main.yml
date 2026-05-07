@@ -1,0 +1,54 @@
+---
+- name: Preliminary Checks
+  ansible.builtin.include_tasks:
+    file: 00_preliminary_check.yml
+
+- name: Registration
+  ansible.builtin.include_tasks:
+    file: 01_rhsm.yml
+
+- name: Patch Server
+  ansible.builtin.include_tasks:
+    file: 02_patch.yml
+
+- name: Configure Capsule Storage
+  ansible.builtin.include_tasks:
+    file: 03_configure_storage.yml
+
+- name: Install required packages
+  ansible.builtin.include_tasks:
+    file: 04_install_packages.yml
+
+- name: Configure Firewall
+  ansible.builtin.include_tasks:
+    file: 05_configure_firewall.yml
+
+- name: Configure DNS
+  ansible.builtin.include_tasks:
+    file: 06_dns_config.yml
+
+- name: Generate Default Capsule certificate
+  ansible.builtin.include_tasks:
+    file: 07_generate_cap_default_cert.yml
+
+# - name: Generate Custom Capsule Certificate
+#   ansible.builtin.include_tasks:
+#     file: 07_generate_cap_cert.yml
+
+- name: Install Capsule Server
+  ansible.builtin.include_tasks:
+    file: 08_install_capsule.yml
+
+- name: Post Configuration
+  ansible.builtin.include_tasks:
+    file: 09_post_config.yml
+
+- name: Sync Capsule
+  ansible.builtin.include_tasks:
+    file: 10_sync_capsule.yml
+
+- name: Configure Load Balancing
+  ansible.builtin.include_tasks:
+    file: 11_haproxy.yml
+  when: satellite_haproxy is true
+...

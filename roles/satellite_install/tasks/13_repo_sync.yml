@@ -1,0 +1,55 @@
+---
+- name: Search for products with at least 1 repo
+  ansible.builtin.uri:
+    url: "{{ satellite_server_url }}/katello/api/organizations/1/products?per_page=500"
+    method: GET
+    return_content: true
+    user: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    force_basic_auth: true
+    validate_certs: false
+  register: products_output
+
+- name: Create list of products
+  ansible.builtin.set_fact:
+    enabled_products: "{{ enabled_products | default([]) + [item['name']] }}"
+  loop: "{{ products_output['json']['results'] }}"
+  when: item['repository_count'] > 0
+
+- name: Repo sync | Sync all repos for enabled products
+  redhat.satellite.repository_sync:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    product: "{{ item }}"
+    organization: "{{ satellite_organization }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  loop: "{{ enabled_products }}"
+  register: repo_sync_status
+  async: "{{ satellite_repo_sync_wait_time | int }}"
+  poll: 0
+
+- name: Repo sync | Wait for repo sync to finish
+  ansible.builtin.async_status:
+    jid: "{{ item['ansible_job_id'] }}"
+  register: repo_sync_status_jobs
+  retries: "{{ (satellite_repo_sync_wait_time // 10) }}"
+  delay: 10
+  until: repo_sync_status_jobs['finished']
+  loop: "{{ repo_sync_status['results'] }}"
+
+- name: Ensure a sync plan for Red Hat products exist
+  redhat.satellite.sync_plan:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    name: "{{ satellite_syncplan_name }}"
+    description: "{{ satellite_syncplan_desc | default(omit) }}"
+    interval: "{{ satellite_syncplan_interval }}"
+    enabled: true
+    state: present
+    sync_date: "{{ satellite_sync_date }}"
+    products: "{{ enabled_products }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+...

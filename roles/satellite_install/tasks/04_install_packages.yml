@@ -1,0 +1,11 @@
+---
+- name: Install Satellite Packages | Get host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install Satellite Packages | Install packages # noqa: package-latest
+  ansible.builtin.dnf:
+    name: "{{ satellite_packages }}"
+    state: latest
+  when: "'satellite' not in ansible_facts['packages']"
+...

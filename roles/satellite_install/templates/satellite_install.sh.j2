@@ -1,0 +1,6 @@
+#!/bin/bash
+# note this file is created by and controlled by ansible
+# make a copy if you wish to modify and/or use it
+
+satellite-installer --scenario {{ satellite_installer_scenario }} \
+  {{ satellite_installer_options }}

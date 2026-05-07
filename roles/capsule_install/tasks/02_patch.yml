@@ -1,0 +1,68 @@
+---
+# - name: Patch | Clean dnf-clean-metadata
+#   ansible.builtin.file:
+#     path: /var/cache/dnf
+#     state: absent
+
+- name: Patch | Clean DNF
+  ansible.builtin.command: dnf clean all
+
+- name: Patch | Remove unneeded packages
+  ansible.builtin.dnf:
+    name: iwl7265-firmware
+    state: absent
+
+- name: Patch | Check servers for available packages updates
+  ansible.builtin.dnf:
+    list: updates
+  register: package_updates
+  when: ansible_distribution == "RedHat"
+
+- name: Patch | Print the number of package updates
+  ansible.builtin.debug:
+    msg: "{{ ansible_fqdn }} has {{ package_updates['results'] | count }} updates"
+  when: package_updates['results'] | count > 0
+
+- name: Patch | Update host
+  when:
+    - package_updates['results'] | count > 0
+  block:
+    - name: Patch | Ensure package updates variable is defined
+      ansible.builtin.assert:
+        that:
+          - package_updates is defined
+
+    - name: Patch | Update server with latest packages # noqa: package-latest
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      when:
+        - ansible_distribution == "RedHat"
+        - package_updates['results'] | count > 0
+
+    - name: Patch | Enable SELinux
+      ansible.posix.selinux:
+        policy: targeted
+        state: enforcing
+
+    - name: Patch | Create autorelabel file # noqa: risky-file-permissions
+      ansible.builtin.file:
+        path: /.autorelabel
+        state: touch
+
+    - name: Patch | Check if server needs to restart
+      ansible.builtin.command: needs-restarting -r
+      register: restart_required
+      ignore_errors: true
+      failed_when: false
+      changed_when: restart_required['rc'] != 0
+
+    - name: Patch | Reboot
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible after Linux kernel update"
+        reboot_timeout: 3600
+        test_command: date
+
+- name: Patch | Refresh Ansible facts
+  ansible.builtin.setup:
+...

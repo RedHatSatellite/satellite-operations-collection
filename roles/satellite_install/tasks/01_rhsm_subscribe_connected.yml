@@ -1,0 +1,121 @@
+---
+- name: "Set timezone to {{ satellite_timezone }}"
+  community.general.timezone:
+    name: "{{ satellite_timezone }}"
+
+- name: Restart crond
+  ansible.builtin.service:
+    name: crond
+    state: restarted
+
+# Used for AWS deployments
+- name: RHSM Subscribe | Check if amazon-id.conf is there
+  ansible.builtin.stat:
+    path: /etc/yum/pluginconf.d/amazon-id.conf
+  register: stat_result
+
+- name: RHSM Subscribe | Disable amazon-id.conf
+  ansible.builtin.lineinfile:
+    path: /etc/yum/pluginconf.d/amazon-id.conf
+    regexp: '^enabled=1'
+    line: enabled=0
+    backrefs: true
+  when: stat_result['stat']['exists']
+
+- name: RHSM Subscribe | Get a list of all the files in /etc/yum.repos.d
+  ansible.builtin.find:
+    paths: /etc/yum.repos.d
+    patterns: "*.repo"
+  register: repo_files
+
+- name: RHSM Subscribe | Checking if already registered
+  ansible.builtin.shell: subscription-manager list | grep -i satellite  > /dev/null
+  register: status
+  failed_when: status['rc'] not in [1,0]
+  become: true
+
+  # TODO rhc_system_roles could improve this block
+- name: Subscription block
+  when: status['rc'] == 1
+  block:
+      # TODO add task to backup repo files
+    - name: RHSM Subscribe | Remove any file in /etc/yum.repos.d that isn't redhat.repo
+      ansible.builtin.file:
+        path: "{{ item['path'] }}"
+        state: absent
+      when: item['path'] != "/etc/yum.repos.d/redhat.repo"
+      with_items: "{{ repo_files['files'] }}"
+
+    - name: RHSM Subscribe | Stop rhsm service
+      ansible.builtin.service:
+        name: rhsm
+        state: stopped
+
+    - name: RHSM Subscribe | Update rhsm.conf hostname
+      ansible.builtin.lineinfile:
+        path: /etc/rhsm/rhsm.conf
+        regexp: '^hostname'
+        line: 'hostname = subscription.rhsm.redhat.com'
+
+    - name: RHSM Subscribe | Update rhsm.conf baseurl
+      ansible.builtin.lineinfile:
+        path: /etc/rhsm/rhsm.conf
+        regexp: '^baseurl'
+        line: 'baseurl = https://cdn.redhat.com'
+
+    - name: RHSM Subscribe | Update rhsm.conf repo_ca_cert
+      ansible.builtin.lineinfile:
+        path: /etc/rhsm/rhsm.conf
+        regexp: '^repo_ca_cert'
+        line: 'repo_ca_cert = %(ca_cert_dir)sredhat-uep.pem'
+
+    - name: RHSM Subscribe | Update rhsm.conf prefix
+      ansible.builtin.lineinfile:
+        path: /etc/rhsm/rhsm.conf
+        regexp: '^prefix'
+        line: 'prefix = /subscription'
+
+    - name: RHSM Subscribe | Start rhsm service
+      ansible.builtin.service:
+        name: rhsm
+        state: started
+
+    - name: RHSM Subscribe | Remove old subscription
+      community.general.redhat_subscription:
+        state: absent
+
+    - name: RHSM Subscribe | Clean subscription manager
+      ansible.builtin.shell: subscription-manager clean
+
+    - name: RHSM Subscribe | Remove old RPMs from Satellite 6
+      ansible.builtin.yum:
+        name:
+          - katello-ca-consumer-*.noarch
+        state: absent
+
+    - name: RHSM Subscribe | Using an Activation Key for register to Red Hat CDN
+      community.general.redhat_subscription:
+        state: present
+        activationkey: "{{ satellite_rhn_activation_key }}"
+        org_id: "{{ satellite_rhn_org }}"
+        force_register: true
+        server_proxy_hostname: "{{ satellite_proxy_server | default(omit) }}"
+        server_proxy_port: "{{ satellite_proxy_port | default(omit) }}"
+        server_proxy_scheme: "{{ satellite_proxy_scheme | default(omit) }}"
+
+- name: RHSM Subscribe | Enable repositories
+  community.general.rhsm_repository:
+    name: "{{ item['content_overrides'] | map(attribute='label') }}"
+    state: enabled
+  loop: "{{ satellite_activation_keys | selectattr('name', 'match', satellite_ak) }}"
+  when: status['rc'] == 1
+
+# TODO only run on RHEL 8 - add when condition
+# TODO only run on satellite 6.16
+- name: RHSM Subscribe | Enable Satellite DNF Module
+  ansible.builtin.shell:
+    cmd: dnf module enable satellite:el8 -y
+  register: status
+  failed_when: status['rc'] not in [1,0]
+  become: true
+...

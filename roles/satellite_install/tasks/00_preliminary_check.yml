@@ -1,0 +1,59 @@
+---
+# TODO Refactor this task
+# - name: Check | Validate Operating System
+#   ansible.builtin.assert:
+#     that:
+#       - ansible_distribution_major_version != satellite_os_version
+#     fail_msg: |
+#       Red Hat Satellite {{ satellite_deployment_version }} must be installed on Red Hat Enterprise Linux {{ ansible_distribution_major_version }}
+
+- name: Check | Validate Red Hat Satellite version is defined
+  ansible.builtin.assert:
+    that:
+      - satellite_deployment_version is defined
+      - satellite_deployment_version | length > 0
+    fail_msg: |
+      Define a supported version of Red Hat Satellite. Supported versions can be found at https://access.redhat.com/support/policy/updates/satellite.
+
+- name: Check | Check if RHN Organization and Activation Key is defined
+  ansible.builtin.assert:
+    that:
+      - satellite_rhn_org is defined and satellite_rhn_org | length > 0
+      - satellite_rhn_activation_key is defined and satellite_rhn_activation_key | length > 0
+    success_msg: |
+      - "RHN Organization ID: {{ satellite_rhn_org }}"
+      - "RHN Activation Key: {{ satellite_rhn_activation_key }}"
+    fail_msg: |
+      Create an Access Key and get Organization ID from https://console.redhat.com/insights/connector/activation-keys
+  when: satellite_rhn_connected is true
+
+- name: Check | Check location of where the Satellite will be located
+  ansible.builtin.assert:
+    that:
+      - satellite_location is defined
+      - satellite_location | length > 0
+    fail_msg: |
+      Define a location where Satellite will be installed
+
+- name: Check | Verify Memory Size on Red Hat Satellite server
+  ansible.builtin.assert:
+    that:
+      - ansible_memtotal_mb >= satellite_min_memory_size
+    fail_msg: |-
+      The total memory size is below the required threshold.
+      Total memory must be greater than {{ (satellite_min_memory_size / 1024) | round | int }} GB.
+      Current memory size is {{ (ansible_memtotal_mb / 1024) | round | int }} GB.
+    success_msg: |-
+      Current memory size: {{ (ansible_memtotal_mb / 1024) | round | int }} GB
+
+- name: Check | Verify CPU count on Red Hat Satellite server
+  ansible.builtin.assert:
+    that:
+      - ansible_processor_vcpus >= satellite_min_cpu_count
+    fail_msg: |-
+      The total CPU count is below the required threshold.
+      Total CPU must be greater than {{ satellite_min_cpu_count }} CPUs.
+      Current CPU count {{ ansible_processor_vcpus }}.
+    success_msg: |-
+      Current CPU count {{ ansible_processor_vcpus }}.
+...

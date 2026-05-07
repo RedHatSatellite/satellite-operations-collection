@@ -1,0 +1,15 @@
+---
+- name: Post config | Set capsule org and location
+  redhat.satellite.smart_proxy:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "https://{{ satellite_fqdn }}"
+    name: "{{ ansible_fqdn }}"
+    url: "https://{{ ansible_fqdn }}:9090"
+    organizations: "{{ satellite_capsule_organization }}"
+    locations: "{{ satellite_capsule_location }}"
+    lifecycle_environments: "{{ satellite_capsule_lifecycle_envs }}"
+    validate_certs: false
+  delegate_to: "{{ satellite_fqdn }}"
+
+...

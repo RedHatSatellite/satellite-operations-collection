@@ -1,0 +1,50 @@
+---
+- name: Manifest | Check for valid subscription
+  redhat.satellite.subscription_info:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    search: "{{ satellite_subscription_to_search }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  register: subscription_output
+
+- name: Manifest | Upload the manifest for Connected Satellite
+  redhat.satellite.subscription_manifest:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    state: present
+    manifest_path: "{{ satellite_manifest_path }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  when:
+    - subscription_output['subscriptions'] is defined
+    - subscription_output['subscriptions'] | length == 0
+    - satellite_rhn_connected is true
+
+- name: Manifest | Upload the manifest for Disconnected Satellite
+  redhat.satellite.subscription_manifest:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    state: present
+    manifest_path: "{{ satellite_disconnected_manifest_path }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  when:
+    - subscription_output['subscriptions'] is defined
+    - subscription_output['subscriptions'] | length == 0
+    - satellite_rhn_connected is false
+
+- name: Manifest | Refresh the manifest
+  redhat.satellite.subscription_manifest:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    validate_certs: false
+    state: refreshed
+    validate_certs: "{{ satellite_validate_certs }}"
+  when: satellite_rhn_connected is true
+...

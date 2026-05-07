@@ -1,0 +1,18 @@
+---
+- name: Ensure content views for capsule is created
+  ansible.builtin.include_role:
+    name: redhat.satellite.content_views
+
+- name: Publish and promote Content View
+  redhat.satellite.content_view_version:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    content_view: "{{ item['name'] }}"
+    lifecycle_environments: "{{ item['lifecycle_environments'] }}"
+    description: "Initial version"
+    version: "1.0"
+    validate_certs: "{{ satellite_validate_certs }}"
+  loop: "{{ satellite_content_views }}"
+...

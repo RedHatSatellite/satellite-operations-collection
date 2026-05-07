@@ -1,0 +1,11 @@
+{%- if (satellite_min_cpu_count >= satellite_size | selectattr('name', 'equalto', 'default') | map(attribute='min_cpu') | first | int) and (satellite_min_cpu_count < satellite_size | selectattr('name', 'equalto', 'medium') | map(attribute='min_cpu') | first | int) -%}
+default
+{%- elif (satellite_min_cpu_count >= satellite_size | selectattr('name', 'equalto', 'medium') | map(attribute='min_cpu') | first | int) and (satellite_min_cpu_count < satellite_size | selectattr('name', 'equalto', 'large') | map(attribute='min_cpu') | first | int) -%}
+medium
+{%- elif (satellite_min_cpu_count >= satellite_size | selectattr('name', 'equalto', 'large') | map(attribute='min_cpu') | first | int) and (satellite_min_cpu_count < satellite_size | selectattr('name', 'equalto', 'extra-large') | map(attribute='min_cpu') | first | int) -%}
+large
+{%- elif (satellite_min_cpu_count >= satellite_size | selectattr('name', 'equalto', 'extra-large') | map(attribute='min_cpu') | first | int) and (satellite_min_cpu_count < satellite_size | selectattr('name', 'equalto', 'extra-extra-large') | map(attribute='min_cpu') | first| int) -%}
+extra-large
+{%- else -%}
+extra-extra-large
+{%- endif -%}

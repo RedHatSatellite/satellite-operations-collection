@@ -1,0 +1,14 @@
+---
+- name: Ensure service is running and enabled.
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Ensure RH-Satellite-6 service is allowed.
+  ansible.posix.firewalld:
+    service: RH-Satellite-6
+    immediate: true
+    permanent: true
+    state: enabled
+...

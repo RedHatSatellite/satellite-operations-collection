@@ -1,0 +1,28 @@
+---
+# Satellite Settings
+satellite_server_url: "satellite.fqdn" # string
+satellite_username: "admin" # Username for Red Hat Satellite Administration
+satellite_password: "changeme" # Best Practice: Store satellite_password in a vault
+satellite_organization: "Default Organization"
+
+# Optional Variables with defaults
+satellite_validate_certs: false    # boolean
+satellite_operation_timeout: 7200  # 2 hours in seconds, integer
+satellite_poll_interval: 30        # 30 seconds, integer
+satellite_max_retries: 3           # 3 attempts, integer
+satellite_retry_delay: 30          # 30 seconds, integer
+satellite_import_wait_time: 21600  # 21600 seconds == 6 hours
+
+# Import Settings
+satellite_timestamp: "{{ ansible_date_time['date'] }}"
+satellite_directories: "/var/lib/pulp"
+satellite_import_content_library: true # boolean, default true
+satellite_import_lock_file: "/tmp/satellite-import.lock"
+satellite_import_path: "{{ satellite_directories }}/imports" # Update if imports have sub-directories
+satellite_import_content_library_metadata_file: "{{ satellite_import_path }}/metadata.json" # string, file path for metadata_file
+satellite_import_history: true
+satellite_required_space_gb: 500 # integer, set to number in GB; 2000 GB == 2 TB
+satellite_cleanup_old_imports: false # Default set to true, reduces the amount of content library imports
+satellite_cleanup_old_import_age: "30d" # Default to 30 days, format is integer/string 1w == 1 week / 1d == 1 day
+satellite_import_content_library_name: "" # String, default defined, empty
+...

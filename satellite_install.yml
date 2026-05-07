@@ -1,0 +1,11 @@
+---
+# Example Playbook for Connected and Disconnected Satellite Installations
+- name: Configure and Install Satellite
+  hosts: connected_satellite
+  gather_facts: true
+  become: true
+
+  roles:
+    - satellite_install
+
+...

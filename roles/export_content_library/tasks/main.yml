@@ -1,0 +1,6 @@
+---
+# Execute Export Content Library
+- name: Export Content Library
+  ansible.builtin.include_tasks:
+    file: export_content_library.yml
+...

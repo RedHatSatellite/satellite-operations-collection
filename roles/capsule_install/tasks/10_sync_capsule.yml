@@ -1,0 +1,71 @@
+---
+- name: Sync | Get capsules information
+  ansible.builtin.uri:
+    url: "https://{{ satellite_fqdn }}/katello/api/capsules?per_page=100"
+    method: GET
+    return_content: true
+    user: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    force_basic_auth: true
+  register: capsules
+
+- name: Sync | Set variable for capsule ID
+  ansible.builtin.set_fact:
+    capsule_id: "{{ capsules['json']['results'] | selectattr('name', 'match', ansible_fqdn) | map(attribute='id') | join(', ') }}"
+
+- name: Sync | Start capsule sync
+  ansible.builtin.uri:
+    url: "https://{{ satellite_fqdn }}/katello/api/capsules/{{ capsule_id }}/content/sync"
+    user: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    method: POST
+    body_format: json
+    headers:
+      Content_Type: application/json
+    body:
+      id: "{{ capsule_id }}"
+    status_code:
+      - 202
+    force_basic_auth: true
+  register: capsule_sync
+
+- name: Sync | Set variable for sync task id
+  ansible.builtin.set_fact:
+    sync_task_id: "{{ capsule_sync['json']['id'] }}"
+
+- name: Sync | Wait until capsule sync is finished
+  ansible.builtin.uri:
+    url: "https://{{ satellite_fqdn }}/katello/api/capsules/{{ capsule_id }}/content/sync"
+    user: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    method: GET
+    body_format: json
+    headers:
+      Content_Type: application/json
+    body:
+      id: "{{ capsule_id }}"
+    force_basic_auth: true
+  register: capsule_sync_status
+  until: capsule_sync_status['json']['active_sync_tasks'] | length == 0
+  retries: "{{ (satellite_capsule_sync_wait_time // 10) }}"
+  delay: 10
+
+- name: Sync | Get sync history
+  ansible.builtin.uri:
+    url: "https://{{ satellite_fqdn }}/katello/api/capsules/{{ capsule_id }}/content/sync"
+    user: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    method: GET
+    body_format: json
+    headers:
+      Content_Type: application/json
+    body:
+      id: "{{ capsule_id }}"
+    force_basic_auth: true
+  register: capsule_sync_history
+
+- name: Sync | Assert that sync was successful
+  ansible.builtin.assert:
+    that: capsule_sync_history['json']['last_sync_task']['result'] == 'success'
+  when: capsule_sync_history['json']['last_sync_task']['id'] == sync_task_id
+...

@@ -1,0 +1,84 @@
+---
+- name: HAProxy Config | Set timezone to UTC
+  community.general.timezone:
+    name: UTC
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Restart crond
+  ansible.builtin.service:
+    name: crond
+    state: restarted
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Generate registration command for loadbalancer server
+  redhat.satellite.registration_command:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "https://{{ satellite_fqdn }}"
+    organization: "{{ satellite_capsule_organization }}"
+    activation_keys: "{{ satellite_loadbalancer_ak }}"
+    location: "{{ satellite_capsule_location }}"
+    setup_insights: false
+    update_packages: true
+    insecure: true
+    validate_certs: false
+    force: true
+  register: command
+  run_once: true
+
+- name: HAProxy Config | Perform registration # noqa: command-instead-of-shell no-changed-when
+  ansible.builtin.shell:
+    cmd: "{{ command.registration_command }}"
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Install required packages
+  ansible.builtin.dnf:
+    name:
+      - haproxy
+      - policycoreutils-python-utils
+    state: latest
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Update server with latest packages # noqa: package-latest
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Configure SELinux
+  ansible.posix.seboolean:
+    name: haproxy_connect_any
+    state: true
+    persistent: true
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Copy haproxy.cfg to server
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    mode: '0644'
+    backup: true
+    validate: haproxy -f %s -c -q
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Enable HAProxy
+  ansible.builtin.service:
+    name: haproxy
+    state: started
+    enabled: true
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+
+- name: HAProxy Config | Reboot server
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+  delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+  run_once: true
+...

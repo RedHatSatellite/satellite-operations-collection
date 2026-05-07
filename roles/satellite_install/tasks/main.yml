@@ -1,0 +1,83 @@
+---
+- name: Preliminary Checks
+  ansible.builtin.include_tasks:
+    file: 00_preliminary_check.yml
+
+- name: RHSM Subscribe | Connected satellite
+  ansible.builtin.include_tasks:
+    file: 01_rhsm_subscribe_connected.yml
+  when: satellite_rhn_connected is true
+
+- name: RHSM Subscribe | Disconnected satellite
+  ansible.builtin.include_tasks:
+    file: 01_rhsm_subscribe_disconnected.yml
+  when: satellite_rhn_connected is false
+
+- name: Patch Server
+  ansible.builtin.include_tasks:
+    file: 02_patch.yml
+
+- name: Configure Storage
+  ansible.builtin.include_tasks:
+    file: 03_storage_config.yml
+
+- name: Install Required Packages
+  ansible.builtin.include_tasks:
+    file: 04_install_packages.yml
+
+- name: Configure Firewall
+  ansible.builtin.include_tasks:
+    file: 05_configure_firewall.yml
+
+- name: Generate Custom Certificates
+  ansible.builtin.include_tasks:
+    file: 06_prep-custom-certs.yml
+
+- name: Configure DNS
+  ansible.builtin.include_tasks:
+    file: 07_dns_config.yml
+
+- name: Install Satellite
+  ansible.builtin.include_tasks:
+    file: 08_install_satellite.yml
+
+- name: Configure Settings
+  ansible.builtin.include_tasks:
+    file: 09_settings.yml
+
+- name: Configure Manifest
+  ansible.builtin.include_tasks:
+    file: 10_manifest.yml
+
+- name: Enable Red Hat Repositories
+  ansible.builtin.include_tasks:
+    file: 11_enablerepos.yml
+
+- name: Configure 3rd-Party Products
+  ansible.builtin.include_tasks:
+    file: 12_third_party_products.yml
+
+- name: Sync Repositories
+  ansible.builtin.include_tasks:
+    file: 13_repo_sync.yml
+
+- name: Configure Lifecycle Environments
+  ansible.builtin.include_tasks:
+    file: 14_lifecycle_envs.yml
+
+- name: Configure Content Views
+  ansible.builtin.include_tasks:
+    file: 15_content_views.yml
+
+- name: Configure Activation Keys
+  ansible.builtin.include_tasks:
+    file: 16_activation_keys.yml
+
+- name: Configure Locations
+  ansible.builtin.include_tasks:
+    file: 17_locations.yml
+
+- name: Configure Satellite Capsule Location
+  ansible.builtin.include_tasks:
+    file: 18_satellite_location.yml
+...

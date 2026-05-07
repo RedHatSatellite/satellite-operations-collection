@@ -1,0 +1,30 @@
+---
+- name: Firewall | Ensure service is running and enabled
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Firewall | Ensure RH-Satellite-6 service is allowed
+  ansible.posix.firewalld:
+    service: RH-Satellite-6-capsule
+    immediate: true
+    permanent: true
+    state: enabled
+
+- name: HAProxy Firewall Config
+  when:
+    - satellite_haproxy is true 
+    - satellite_loadbalancer_fqdn is defined
+  block:
+    - name: Firewall | Open ports on Proxy for load balancing
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        state: enabled
+        immediate: true
+        permanent: true
+      loop: "{{ satellite_loadbalancer_ports }}"
+      run_once: true
+      delegate_to: "{{ satellite_loadbalancer_fqdn }}"
+
+...

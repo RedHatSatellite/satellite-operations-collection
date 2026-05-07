@@ -1,0 +1,24 @@
+---
+- name: Idempotency | Check if capsule is already installed
+  ansible.builtin.shell: satellite-maintain service status > /dev/null
+  ignore_errors: true
+  register: service
+
+- name: Run the capsule installer
+  ansible.builtin.command: >-
+    satellite-installer --scenario {{ satellite_installer_scenario }}
+    {{ satellite_installer_options | join(' ') }}
+  register: capsule_installer_output
+  when: 
+    - service.rc != 0
+    - satellite_haproxy is false
+
+- name: Run the capsule installer with load balancing
+  ansible.builtin.command: >-
+    satellite-installer --scenario {{ satellite_installer_scenario }}
+    {{ satellite_installer_loadbalanced_options | join(' ') }}
+  register: capsule_installer_output
+  when:
+    - service.rc != 0
+    - satellite_haproxy is true
+...

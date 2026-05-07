@@ -1,0 +1,127 @@
+---
+- name: Remove certificate files from disconnected satellite
+  ansible.builtin.file:
+    path: "/root/capsule_cert/{{ ansible_fqdn }}-capsule-certs.tar"
+    state: absent
+  delegate_to: "{{ satellite_fqdn }}"
+
+- name: Generate Capsule Certificate | Create directory /root/capsule_cert/
+  ansible.builtin.file:
+    path: /root/capsule_cert/
+    state: directory
+    mode: '0755'
+  delegate_to: "{{ satellite_fqdn }}"
+  run_once: true
+
+- name: Generate Capsule Certificate | Check for existing certs tarball on upstream satellite
+  ansible.builtin.stat:
+    path: "/root/capsule_cert/{{ ansible_fqdn }}-capsule-certs.tar"
+  register: existing_tarball
+  delegate_to: "{{ satellite_fqdn }}"
+
+- name: Certificate generation block
+  throttle: 1
+  block:
+    - name: Generate Capsule Certificate | Generate the cert # noqa: no-changed-when
+      ansible.builtin.command: >-
+        capsule-certs-generate --foreman-proxy-fqdn {{ ansible_fqdn }}
+        --certs-tar "/root/capsule_cert/{{ ansible_fqdn }}-capsule-certs.tar"
+      register: cert_generate_output
+      delegate_to: "{{ satellite_fqdn }}"
+      when:
+        - not (existing_tarball.stat.exists)
+        - satellite_haproxy is false
+
+    - name: Generate Capsule Certificate | Generate the cert with HAProxy # noqa: no-changed-when
+      ansible.builtin.command: >-
+        capsule-certs-generate --foreman-proxy-fqdn {{ ansible_fqdn }}
+        --certs-tar "/root/capsule_cert/{{ ansible_fqdn }}-capsule-certs.tar"
+        --foreman-proxy-cname "{{ satellite_loadbalancer_fqdn }}"
+      register: cert_generate_haproxy_output
+      delegate_to: "{{ satellite_fqdn }}"
+      when:
+        - not (existing_tarball.stat.exists)
+        - satellite_haproxy is true
+
+    - name: Generate Capsule Certificate | Check for existing certs tarball on capsule
+      ansible.builtin.stat:
+        path: "/root/capsule_cert/{{ ansible_fqdn }}-capsule-certs.tar"
+      register: existing_capsule_tarball
+
+    - name: Generate Capsule Certificate | Fetch certs from satellite
+      ansible.builtin.fetch:
+        src: "/root/capsule_cert/{{ ansible_fqdn }}-capsule-certs.tar"
+        dest: /tmp/
+        flat: true
+      delegate_to: "{{ satellite_fqdn }}"
+      when: not (existing_capsule_tarball.stat.exists)
+
+    - name: Generate Capsule Certificate | Create certs dir on capsule # noqa: risky-file-permissions
+      ansible.builtin.file:
+        path: "/root/capsule_cert/{{ ansible_fqdn }}"
+        state: directory
+        mode: '0755'
+
+    - name: Generate Capsule Certificate | Copy certs to capsule # noqa: risky-file-permissions
+      ansible.builtin.copy:
+        src: "/tmp/{{ ansible_fqdn }}-capsule-certs.tar"
+        dest: "/root/capsule_cert/{{ ansible_fqdn }}/{{ ansible_fqdn }}-capsule-certs.tar"
+      when: not (existing_capsule_tarball.stat.exists)
+
+    - name: Set Capsule variables for standard install
+      when: satellite_haproxy is false
+      block:
+        - name: Generate Capsule Certificate | Set foreman-proxy-oauth-consumer-key fact
+          ansible.builtin.set_fact:
+            foreman_proxy_oauth_consumer_key: "{{ line.split('\"')[1] | regex_replace('\"', '') }}"
+          when:
+            - cert_generate_output is defined
+            - not (existing_tarball.stat.exists)
+            - line | regex_search('foreman-proxy-oauth-consumer-key')
+          loop_control:
+            loop_var: line
+          with_items:
+            - "{{ cert_generate_output.stdout_lines }}"
+
+        - name: Generate Capsule Certificate | Set foreman-proxy-oauth-consumer-secret fact
+          ansible.builtin.set_fact:
+            foreman_proxy_oauth_consumer_secret: "{{ line.split('\"')[1] | regex_replace('\"', '') }}"
+          when:
+            - cert_generate_output is defined
+            - not (existing_tarball.stat.exists)
+            - line | regex_search('foreman-proxy-oauth-consumer-secret')
+            - satellite_haproxy is false
+          loop_control:
+            loop_var: line
+          with_items:
+            - "{{ cert_generate_output.stdout_lines }}"
+    - name: Set Capsule variables for load-balanced install
+      when: satellite_haproxy is true
+      block:
+        - name: Generate Capsule Certificate | Set foreman-proxy-oauth-consumer-key fact
+          ansible.builtin.set_fact:
+            foreman_proxy_oauth_consumer_key: "{{ line.split('\"')[1] | regex_replace('\"', '') }}"
+          when:
+            - cert_generate_haproxy_output is defined
+            - not (existing_tarball.stat.exists)
+            - line | regex_search('foreman-proxy-oauth-consumer-key')
+            - satellite_haproxy is true
+          loop_control:
+            loop_var: line
+          with_items:
+            - "{{ cert_generate_haproxy_output.stdout_lines }}"
+
+        - name: Generate Capsule Certificate | Set foreman-proxy-oauth-consumer-secret fact
+          ansible.builtin.set_fact:
+            foreman_proxy_oauth_consumer_secret: "{{ line.split('\"')[1] | regex_replace('\"', '') }}"
+          when:
+            - cert_generate_haproxy_output is defined
+            - not (existing_tarball.stat.exists)
+            - line | regex_search('foreman-proxy-oauth-consumer-secret')
+            - satellite_haproxy is true
+          loop_control:
+            loop_var: line
+          with_items:
+            - "{{ cert_generate_haproxy_output.stdout_lines }}"
+
+...

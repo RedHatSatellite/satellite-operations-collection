@@ -1,0 +1,83 @@
+---
+- name: Check to see if LVM exists from previous install attempt
+  ansible.builtin.set_fact:
+    lvm_exists: true
+  when: ansible_facts['lvm']['vgs'][capsule_vg_name] is defined
+
+- name: Find existing storage device
+  ansible.builtin.set_fact:
+    capsule_data_disk: "{{ item['key'] }}"
+  loop: "{{ ansible_facts['lvm']['pvs'] | dict2items }}"
+  when: item['value']['vg'] == capsule_vg_name and lvm_exists
+
+- name: Find suitable disk device for installation
+  block:
+    - name: Storage Config | Set variable for suitable disks
+      ansible.builtin.set_fact:
+        data_disk_list: "{{ data_disk_list | default([]) + [item['key']] }}"
+      loop: "{{ ansible_facts['devices'] | dict2items }}"
+      when:
+        - capsule_data_disk is not defined
+        - item['key'] is search("sd") or item['key'] is search("xvd")
+        - item['value']['size'] | human_to_bytes >= capsule_data_disk_min_size | string | human_to_bytes(default_unit="G")
+        - not item['value']['partitions']
+        - not item['value']['holders']
+        - data_disk_list is not defined
+
+    - name: Storage Config | Assert that there is only one suitable disk for Capsule
+      ansible.builtin.assert:
+        that:
+          - data_disk_list | length == 1
+        fail_msg: "There are multiple disks that can be used. Please define capsule_data_disk and rerun"
+
+    - name: Storage Config | Define Capsule data disk
+      ansible.builtin.set_fact:
+        capsule_data_disk: "{{ capsule_data_device }}/{{ data_disk_list[0] }}"
+      loop: "{{ ansible_facts['devices'] | dict2items }}"
+      when:
+        - capsule_data_disk is not defined
+        - item['key'] is search("sd") or item['key'] is search("xvd")
+        - item['value']['size'] | human_to_bytes >= capsule_data_disk_min_size | string | human_to_bytes(default_unit="G")
+        - not item['value']['partitions']
+        - not item['value']['holders']
+  when: capsule_data_disk is not defined
+
+- name: Storage Config | Ensure lvm2 package is installed
+  ansible.builtin.dnf:
+    name: lvm2
+    state: latest
+
+- name: Storage Config | Create the directory path to Satellite's required dirs
+  ansible.builtin.file:
+    path: "{{ item['mount_point'] }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ capsule_req_dirs }}"
+
+- name: Storage Config | Create the volume group.
+  community.general.lvg:
+    vg: "{{ capsule_vg_name }}"
+    pvs: "{{ capsule_data_disk }}"
+
+- name: Storage Config | Create the logical volumes to be mounted to Satellite's required dirs
+  community.general.lvol:
+    vg: "{{ capsule_vg_name }}"
+    lv: "{{ item['lv_name'] }}"
+    size: "{{ item['lv_size'] }}"
+  loop: "{{ capsule_req_dirs }}"
+
+- name: Storage Config | Create a filesystem on the logical volumes that were just created
+  community.general.filesystem:
+    fstype: xfs
+    dev: /dev/mapper/{{ capsule_vg_name }}-{{ item['lv_name'] }}
+  loop: "{{ capsule_req_dirs }}"
+
+- name: Storage Config | Mount the additional disk used to Satellite's data dir
+  ansible.posix.mount:
+    path: "{{ item['mount_point'] }}"
+    src: /dev/mapper/{{ capsule_vg_name }}-{{ item['lv_name'] }}
+    fstype: xfs
+    state: mounted
+  loop: "{{ capsule_req_dirs }}"
+
+...

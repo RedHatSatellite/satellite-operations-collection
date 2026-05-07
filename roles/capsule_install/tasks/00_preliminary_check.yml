@@ -1,0 +1,49 @@
+---
+- name: Check | Validate Operating System
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution_major_version == satellite_os_version
+    fail_msg: |
+      Server must be RHEL 9 or greater
+
+- name: Check | Check if Organization and Activation Key is defined
+  ansible.builtin.assert:
+    that:
+      - satellite_capsule_organization is defined and satellite_capsule_organization | length > 0
+      - satellite_capsule_ak is defined and satellite_capsule_ak | length > 0
+    success_msg: |
+      - "RHN Organization ID: {{ satellite_capsule_organization }}"
+      - "RHN Activation Key: {{ satellite_capsule_ak }}"
+    fail_msg: |
+      Please define an organization and activation key for capsule registration
+
+- name: Check | Check location of where the Capsule will be located
+  ansible.builtin.assert:
+    that:
+      - satellite_capsule_location is defined
+      - satellite_capsule_location | length > 0
+    fail_msg: |
+      Define a location where the Capsule will be installed
+
+- name: Check | Verify memory size on Capsule server
+  ansible.builtin.assert:
+    that:
+      - ansible_memtotal_mb >= satellite_min_memory_size
+    fail_msg: |-
+      The total memory size is below the required threshold.
+      Total memory must be greater than {{ (satellite_min_memory_size / 1024) | round | int }} GB.
+      Current memory size is {{ (ansible_memtotal_mb / 1024) | round | int }} GB.
+    success_msg: |-
+      Current memory size: {{ (ansible_memtotal_mb / 1024) | round | int }} GB
+
+- name: Check | Verify CPU count on Capsule server
+  ansible.builtin.assert:
+    that:
+      - ansible_processor_vcpus >= satellite_min_cpu_count
+    fail_msg: |-
+      The total CPU count is below the required threshold.
+      Total CPU must be greater than {{ satellite_min_cpu_count }} CPUs.
+      Current CPU count {{ ansible_processor_vcpus }}.
+    success_msg: |-
+      Current CPU count {{ ansible_processor_vcpus }}.
+...

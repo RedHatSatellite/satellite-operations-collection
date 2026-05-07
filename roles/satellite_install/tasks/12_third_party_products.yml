@@ -1,0 +1,59 @@
+---
+- name: Content Credentials for Connected Satellite
+  when: satellite_rhn_connected is true
+  block:
+
+    - name: Create content credentials on connected Satellite
+      ansible.builtin.include_role:
+        name: redhat.satellite.content_credentials
+
+    - name: Create 3rd party products and repos on connected satellite
+      ansible.builtin.include_role:
+        name: redhat.satellite.repositories
+
+- name: Content Credentials for Disconnected Satellite
+  when: satellite_rhn_connected is false
+  block:
+
+    - name: Pull list of content credentials from connected satellite
+      redhat.satellite.resource_info:
+        username: "{{ satellite_admin_username }}"
+        password: "{{ satellite_admin_password }}"
+        server_url: "https://{{ satellite_connected_fqdn }}"
+        organization: "{{ satellite_organization }}"
+        full_details: true
+        resource: content_credentials
+        validate_certs: "{{ satellite_validate_certs }}"
+      register: content_credentials_info
+
+    - name: Create list of gpg keys
+      ansible.builtin.set_fact:
+        gpg_keys: "{{ gpg_keys | default([]) + [{'name': item['name'], 'content': item['content']}] }}"
+      loop: "{{ content_credentials_info['resources'] }}"
+
+    - name: Create GPG key files on connected satellite
+      ansible.builtin.template:
+        src: gpg_keys.j2
+        dest: "/var/www/html/pub/{{ item['name'] }}"
+        mode: 0644
+      loop: "{{ gpg_keys }}"
+      delegate_to: "{{ satellite_connected_fqdn }}"
+
+    - name: Download GPG keys to disconnected Satellites
+      ansible.builtin.get_url:
+        url: "https://{{ satellite_connected_fqdn }}/pub/{{ item['name'] }}"
+        dest: "/tmp/{{ item['name'] }}"
+        mode: 0644
+      loop: "{{ gpg_keys }}"
+
+    - name: Create content credentials on disconnected satellite
+      ansible.builtin.include_role:
+        name: redhat.satellite.content_credentials
+
+    - name: Create 3rd party products and repos on disconnected satellite
+      ansible.builtin.include_role:
+        name: redhat.satellite.repositories
+      vars:
+        satellite_content_credentials: "{{ satellite_content_credentials_disconnected }}" # TODO - Research variable and use case
+
+...

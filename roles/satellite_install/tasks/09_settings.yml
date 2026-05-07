@@ -1,0 +1,100 @@
+---
+- name: Satellite Settings | Set Red Hat Satellite Settings
+  redhat.satellite.setting:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    name: "{{ item['name'] }}"
+    value: "{{ item['value'] }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  loop: "{{ satellite_settings }}"
+
+- name: Disable subscription connection for disconnected satellite
+  when: satellite_rhn_connected is false
+  redhat.satellite.setting:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    name: "subscription_connection_enabled"
+    value: "No"
+    validate_certs: "{{ satellite_validate_certs }}"
+
+- name: Create HTTP proxy object
+  redhat.satellite.http_proxy:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    name: "{{ satellite_proxy_server }}"
+    url: "{{ satellite_proxy_scheme }}://{{ satellite_proxy_server }}:{{ satellite_proxy_port }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  when:
+    - satellite_proxy_server is defined
+    - satellite_rhn_connected is true
+
+- name: Set HTTP proxy setting
+  redhat.satellite.setting:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    name: content_default_http_proxy
+    value: "{{ satellite_proxy_server }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  when:
+    - satellite_proxy_server is defined
+    - satellite_rhn_connected is true
+
+- name: Download katello-server certificate from connected satellite # noqa: risky-file-permissions
+  ansible.builtin.get_url:
+    url: "https://{{ satellite_connected_fqdn }}/pub/katello-server-ca.crt"
+    dest: "/etc/rhsm/ca/katello-server-ca.crt"
+    validate_certs: false
+  when: satellite_rhn_connected is false
+
+- name: Grab cert content from file
+  ansible.builtin.slurp:
+    src: "/etc/rhsm/ca/katello-server-ca.crt"
+  register: katello_cert_content
+  when: satellite_rhn_connected is false
+
+- name: Create content credential for disconnected satellite
+  redhat.satellite.content_credential:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    name: "{{ satellite_connected_fqdn }}"
+    content_type: cert
+    content: "{{ katello_cert_content['content'] | b64decode }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  when: satellite_rhn_connected is false
+
+- name: Get ID of content credential for cdn
+  redhat.satellite.content_credential:
+    username: "{{ satellite_admin_username }}"
+    password: "{{ satellite_admin_password }}"
+    server_url: "{{ satellite_server_url }}"
+    organization: "{{ satellite_organization }}"
+    name: "{{ satellite_connected_fqdn }}"
+    validate_certs: "{{ satellite_validate_certs }}"
+  register: content_cred_output
+  when: satellite_rhn_connected is false
+
+- name: Set variable for credential ID
+  ansible.builtin.set_fact:
+    cdn_credential_id: "{{ content_cred_output['entity']['content_credentials'] | map(attribute='id') | join(', ') | int }}"
+  when: satellite_rhn_connected is false
+
+- name: Set CDN to sync from connected satellite # noqa: no-changed-when
+  ansible.builtin.command: >-
+    hammer organization configure-cdn
+    --name={{ satellite_organization }}
+    --type=network_sync
+    --url https://{{ satellite_connected_fqdn }}
+    --username {{ satellite_upstream_admin_username }}
+    --password {{ satellite_upstream_admin_password }}
+    --ssl-ca-credential-id "{{ cdn_credential_id }}"
+    --upstream-organization-label="{{ satellite_organization }}"
+    --upstream-lifecycle-environment-label="Library"
+    --upstream-content-view-label="Default_Organization_View"
+  when: satellite_rhn_connected is false
+...

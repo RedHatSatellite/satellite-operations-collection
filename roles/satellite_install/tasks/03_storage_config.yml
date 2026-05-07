@@ -1,0 +1,92 @@
+---
+- name: Check to see if LVM exists from previous install attempt
+  ansible.builtin.set_fact:
+    lvm_exists: true
+  when: ansible_facts['lvm']['vgs'][satellite_vg_name] is defined
+
+- name: Find existing storage device
+  ansible.builtin.set_fact:
+    satellite_data_disk: "{{ item['key'] }}"
+  loop: "{{ ansible_facts['lvm']['pvs'] | dict2items }}"
+  when: item['value']['vg'] == satellite_vg_name and lvm_exists
+
+# TODO multiple when statements for the block, fix if needed
+- name: Find suitable disk device for installation
+  when:
+    - satellite_data_device_name is not defined
+  block:
+    - name: Storage Config | Set variable for suitable disks
+      ansible.builtin.set_fact:
+        data_disk_list: "{{ data_disk_list | default([]) + [item['key']] }}"
+      loop: "{{ ansible_facts['devices'] | dict2items }}"
+      when:
+        - satellite_data_disk is not defined
+        - item['key'] is search("sd") or item['key'] is search("xvd") or item['key'] is search("vd") or item['key'] is search("nvme")
+        - item['value']['size'] | human_to_bytes >= satellite_data_disk_min_size | string | human_to_bytes(default_unit="G")
+        - not item['value']['partitions']
+        - not item['value']['holders']       # Holders = Mountpoints
+        - data_disk_list is not defined
+
+    - name: Storage Config | Print list of suitable disks
+      ansible.builtin.debug:
+        var: data_disk_list
+
+      # TODO Add data_disk_list to the fail_msg
+    - name: Storage Config | Assert that there is only one suitable disk for Satellite
+      ansible.builtin.assert:
+        that:
+          - data_disk_list | length == 1
+        fail_msg: "There are multiple disks that can be used. Please manually define satellite_data_device_name and rerun"
+
+    - name: Storage Config | Define Satellite data disk
+      ansible.builtin.set_fact:
+        satellite_data_disk: "{{ satellite_data_device }}/{{ data_disk_list[0] }}"
+      loop: "{{ ansible_facts['devices'] | dict2items }}"
+      when:
+        - satellite_data_disk is not defined
+        - item['key'] is search("sd") or item['key'] is search("xvd")
+        - item['value']['size'] | human_to_bytes >= satellite_data_disk_min_size | string | human_to_bytes(default_unit="G")
+        - not item['value']['partitions']
+        - not item['value']['holders']
+  when: satellite_data_disk is not defined
+
+- name: Storage Config | Ensure lvm2 package is installed
+  ansible.builtin.dnf:
+    name: lvm2
+    state: latest
+
+# https://access.redhat.com/documentation/en-us/red_hat_satellite/6.15/pdf/installing_satellite_server_in_a_connected_network_environment/red_hat_satellite-6.15-installing_satellite_server_in_a_connected_network_environment-en-us.pdf
+# See Section 1.2 - Table 1.1
+- name: Storage Config | Create the directory path to Satellite's required dirs
+  ansible.builtin.file:
+    path: "{{ item['mount_point'] }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ satellite_req_dirs }}"
+
+- name: Storage Config | Create the volume group.
+  community.general.lvg:
+    vg: "{{ satellite_vg_name }}"
+    pvs: "{{ satellite_data_disk }}"
+
+- name: Storage Config | Create the logical volumes to be mounted to Satellite's required dirs
+  community.general.lvol:
+    vg: "{{ satellite_vg_name }}"
+    lv: "{{ item['lv_name'] }}"
+    size: "{{ item['lv_size'] }}"
+  loop: "{{ satellite_req_dirs }}"
+
+- name: Storage Config | Create a filesystem on the logical volumes that were just created
+  community.general.filesystem:
+    fstype: xfs
+    dev: /dev/mapper/{{ satellite_vg_name }}-{{ item['lv_name'] }}
+  loop: "{{ satellite_req_dirs }}"
+
+- name: Storage Config | Mount the additional disk used to Satellite's data dir
+  ansible.posix.mount:
+    path: "{{ item['mount_point'] }}"
+    src: /dev/mapper/{{ satellite_vg_name }}-{{ item['lv_name'] }}
+    fstype: xfs
+    state: mounted
+  loop: "{{ satellite_req_dirs }}"
+...

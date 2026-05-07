@@ -1,0 +1,6 @@
+---
+# Execute Import Content Library
+- name: Import Content Library
+  ansible.builtin.include_tasks:
+    file: import_content_library.yml
+...

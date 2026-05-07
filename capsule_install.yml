@@ -1,0 +1,10 @@
+---
+- name: Configure and install Satellite Capsule
+  hosts: capsules
+  gather_facts: true
+  become: true
+
+  roles:
+    - capsule_install
+
+...

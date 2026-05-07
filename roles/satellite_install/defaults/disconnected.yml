@@ -1,0 +1,704 @@
+# Credentials
+satellite_admin_username: admin
+satellite_admin_password:
+satellite_username: "{{ satellite_admin_username }}"
+satellite_password: "{{ satellite_admin_password }}"
+
+# System requirements
+satellite_min_cpu_count: 4
+# Size must be integer, MB
+satellite_min_memory_size: 20240
+# Size must be integer, GB
+satellite_data_disk_min_size: 500
+# Size must be integer, GB
+satellite_min_pulp_size: 300
+# Size must be integer, GB
+satellite_min_pgsql_size: 20
+
+# Administration
+satellite_server_url: "https://{{ ansible_fqdn }}"
+satellite_organization:
+satellite_initial_location: # AAP Survey
+satellite_location: "{{ satellite_initial_location }}"
+satellite_email:
+satellite_giturl: git.example.com
+satellite_disconnected_manifest_path:
+satellite_language: "en_US.utf-8"
+
+# Storage
+satellite_pulp_size: 1500g
+satellite_pgsql_size: 150g
+satellite_req_dirs:
+  - mount_point: /var/lib/pulp
+    lv_name: lv_rhspulp
+    lv_size: "{{ satellite_pulp_size }}"
+  - mount_point: /var/lib/pgsql
+    lv_name: lv_pgsql
+    lv_size: "{{ satellite_pgsql_size }}"
+# Manually define device name if desired (required if multiple devices are suitable as the automation can only select 1)
+# satellite_data_device_name: sdc
+satellite_data_disk: "{{ satellite_data_device }}/{{ satellite_data_device_name }}"
+satellite_vg_name: vg_rhsat
+
+# Satellite
+satellite_rhn_connected: false
+satellite_connected_fqdn: # AAP
+satellite_ak: "satellite6-satinfra"
+satellite_capsule_ak: "capsule6-satinfra"
+satellite_selinux_state: "enforcing"
+satellite_installer_scenario: "satellite"
+satellite_sync_time: "19:30:00"
+satellite_sync_date: "{{ ansible_date_time['date'] }} {{ satellite_sync_time }} {{ ansible_date_time['tz'] }}"
+satellite_syncplan_interval: "daily"
+satellite_syncplan_name: "{{ satellite_syncplan_interval | capitalize }} {{ satellite_organization }} Products"
+satellite_subscription_to_search: "Red Hat Satellite Infrastructure Subscription"
+satellite_repo_sync_wait_time: 21600 # Seconds
+
+satellite_installer_options:
+  - '--foreman-initial-admin-username {{ satellite_admin_username }}'
+  - '--foreman-initial-admin-password {{ satellite_admin_password }}'
+  - '--foreman-initial-organization {{ satellite_organization }}'
+  - '--foreman-initial-location {{ satellite_initial_location }}'
+
+# Basic Settings
+satellite_settings:
+  - name: "default_download_policy"
+    value: "immediate"
+  - name: "default_redhat_download_policy"
+    value: "immediate"
+  - name: "default_proxy_download_policy"
+    value: "immediate"
+  - name: "errata_status_installable"
+    value: "true"
+  - name: "unregister_delete_host"
+    value: "true"
+  - name: "template_sync_associate"
+    value: "never"
+  - name: "template_sync_branch"
+    value: "master"
+  - name: "template_sync_repo"
+    value: "{{ satellite_giturl }}"
+  - name: "template_sync_force"
+    value: "true"
+  - name: "template_sync_lock"
+    value: "true"
+  - name: "administrator"
+    value: "{{ satellite_email }}"
+  - name: "db_pending_seed"
+    value: "false"
+  - name: "entries_per_page"
+    value: "100"
+  - name: "unregister_delete_host"
+    value: "true"
+  - name: "remote_execution_workers_pool_size"
+    value: "100"
+  - name: "ignored_interface_identifiers"
+    value: [ "lo","en*v*", "usb*", "vnet*", "macvtap*", "_vdsmdummy_", "veth*", "docker*", "tap*", "qbr*", "qvb*", "qvo*", "qr-*", "qg-*", "vlinuxbr*", "vovsbr*" ,"bond*" ]
+  - name: "host_tasks_workers_pool_size"
+    value: "100"
+  - name: "login_text"
+    value: "WARNING: You are entering a Private Network. Only approved Example workers using valid log-in credentials are authorized byond this point, subject to Example Policies and contract terms. By accessing this network, you affirm that your system is equipped with active and current protective measures: Anti-Virus/Malware; OS Security updates and active Firewall. It is against Example policy to store Example Confidential or Regulated data on non-Example systems. Example reserves the right to actively log, monitor and disconnect any session not meeting these reequirements or those that pose unwarranted risk to Example's network or systems. If you are not an authorized user, cancel or exit immediately."
+  - name: "unattended_url"
+    value: "https://{{ ansible_fqdn }}"
+
+satellite_packages:
+  - satellite
+  - chrony
+  - sos
+  - fapolicyd
+  - vim
+  - bash-completion
+  - bind-utils
+
+satellite_size:
+  - name: default
+    min_hosts: 0
+    max_hosts: 5000
+    min_ram: 20
+    min_cpu: 4
+  - name: medium
+    min_hosts: 5000
+    max_hosts: 10000
+    min_ram: 32
+    min_cpu: 8
+  - name: large
+    min_hosts: 10000
+    max_hosts: 20000
+    min_ram: 64
+    min_cpu: 16
+  - name: extra-large
+    min_hosts: 20000
+    max_hosts: 60000
+    min_ram: 128
+    min_cpu: 32
+  - name: extra-extra-large
+    min_hosts: 60000
+    max_hosts: 100000
+    min_ram: 256
+    min_cpu: 48
+
+satellite_redhat_repos:
+  - name: "Red Hat Satellite Capsule {{ satellite_deployment_version }} for RHEL {{ ansible_distribution_major_version }} x86_64 (RPMs)"
+    label: "satellite-capsule-{{ satellite_deployment_version }}-for-rhel-{{ ansible_distribution_major_version }}-x86_64-rpms"
+    all: "true"
+  - name: "Red Hat Satellite Maintenance {{ satellite_deployment_version }} for RHEL {{ ansible_distribution_major_version }} x86_64 (RPMs)"
+    label: "satellite-maintenance-{{ satellite_deployment_version }}-for-rhel-{{ ansible_distribution_major_version }}-x86_64-rpms"
+    all: "true"
+  - name: "Red Hat Satellite {{ satellite_deployment_version }} for RHEL {{ ansible_distribution_major_version }} x86_64 (RPMs)"
+    label: "satellite-{{ satellite_deployment_version }}-for-rhel-{{ ansible_distribution_major_version }}-x86_64-rpms"
+    all: "true"
+  - name: "Red Hat Satellite Client 6 for RHEL 9 x86_64 RPMs"
+    label: "satellite-client-6-for-rhel-9-x86_64-rpms"
+    all: "true"
+  # - name: "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs"
+  #   label: "satellite-client-6-for-rhel-8-x86_64-rpms"
+  #   all: "true"
+  # - name: "Red Hat Satellite Client 6 for RHEL 8 s390x RPMs"
+  #   label: "satellite-client-6-for-rhel-8-s390x-rpms"
+  #   all: "true"
+  # - name: "Red Hat Satellite Client 6 for RHEL 9 s390x RPMs"
+  #   label: "satellite-client-6-for-rhel-9-s390x-rpms"
+  #   all: "true"
+  - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS (RPMs)"
+    label: rhel-9-for-x86_64-baseos-rpms
+    repos:
+      - releasever: "9"
+    all: "false"
+  - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream (RPMs)"
+    label: rhel-9-for-x86_64-appstream-rpms
+    repos:
+      - releasever: "9"
+    all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS (RPMs)"
+  #   label: rhel-8-for-x86_64-baseos-rpms
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for x86_64 - AppStream (RPMs)"
+  #   label: rhel-8-for-x86_64-appstream-rpms
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for IBM z Systems - AppStream RPMs 8"
+  #   label: "rhel-8-for-s390x-appstream-rpms"
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for IBM z Systems - BaseOS RPMs 8"
+  #   label: "rhel-8-for-s390x-baseos-rpms"
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 9 for IBM z Systems - AppStream RPMs 9"
+  #   label: "rhel-9-for-s390x-appstream-rpms"
+  #   repos:
+  #     - releasever: "9"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 9 for IBM z Systems - BaseOS RPMs 9"
+  #   label: "rhel-9-for-s390x-baseos-rpms"
+  #   repos:
+  #     - releasever: "9"
+  #   all: "false"
+  # - name: "Red Hat CodeReady Linux Builder for RHEL 8 IBM z Systems RPMs 8"
+  #   label: "codeready-builder-for-rhel-8-s390x-rpms"
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat CodeReady Linux Builder for RHEL 9 IBM z Systems RPMs 9"
+  #   label: "codeready-builder-for-rhel-9-s390x-rpms"
+  #   repos:
+  #     - releasever: "9"
+  #   all: "false"
+upstream_product_path: "http://{{ satellite_connected_fqdn }}/pulp/content/{{ satellite_organization }}/Library/custom"
+
+satellite_content_credentials:
+  - name: RPM-GPG-KEY-EPEL
+    content_type: gpg_key
+    content: "{{ lookup('url', 'https://{{ satellite_connected_fqdn }}/pub/RPM-GPG-KEY-EPEL', split_lines=False, validate_certs=False) }}"
+  # - name: RPM-GPG-KEY-EPEL8
+  #   content_type: gpg_key
+  #   content: "{{ lookup('url', 'https://{{ satellite_connected_fqdn }}/pub/RPM-GPG-KEY-EPEL8', split_lines=False, validate_certs=False) }}"
+  - name: RPM-GPG-KEY-EPEL9
+    content_type: gpg_key
+    content: "{{ lookup('url', 'https://{{ satellite_connected_fqdn }}/pub/RPM-GPG-KEY-EPEL9', split_lines=False, validate_certs=False) }}"
+
+satellite_products:
+  - name: EPEL
+    gpg_key: RPM-GPG-KEY-EPEL
+    repositories:
+      # - name: EPEL8_X86
+      #   content_type: yum
+      #   gpg_key: RPM-GPG-KEY-EPEL8
+      #   url: "{{ upstream_product_path }}/EPEL/EPEL8_X86"
+      - name: EPEL9_X86
+        content_type: yum
+        gpg_key: RPM-GPG-KEY-EPEL9
+        url: "{{ upstream_product_path }}/EPEL/EPEL9_X86"
+      # - name: EPEL8_S390X
+      #   content_type: yum
+      #   gpg_key: RPM-GPG-KEY-EPEL8
+      #   url: "{{ upstream_product_path }}/EPEL/EPEL8_S390X"
+      # - name: EPEL9_S390X
+      #   content_type: yum
+      #   gpg_key: RPM-GPG-KEY-EPEL9
+      #   url: "{{ upstream_product_path }}/EPEL/EPEL9_S390X"
+  # RHEL 8
+  # - name: RHEL 8 UBI Appstream x64
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 8 UBI Appstream - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/debug/
+  #     - name: RHEL 8 UBI Appstream - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/os/
+  #     - name: RHEL 8 UBI Appstream - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/appstream/source/SRPMS/
+  # - name: RHEL 8 UBI Base OS x64
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 8 UBI Base OS - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/debug/
+  #     - name: RHEL 8 UBI Base OS - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/os/
+  #     - name: RHEL 8 UBI Base OS - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/aarch64/baseos/source/SRPMS/
+  # - name: RHEL 8 UBI Appstream ppc641e
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 8 UBI Appstream ppc641e - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/debug/
+  #     - name: RHEL 8 UBI Appstream ppc641e - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/os/
+  #     - name: RHEL 8 UBI Appstream ppc641e - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/appstream/source/SRPMS/
+  # - name: RHEL 8 UBI Base OS ppc641e
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 8 UBI Base OS ppc641e - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/debug/
+  #     - name: RHEL 8 UBI Base OS ppc641e - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/os/
+  #     - name: RHEL 8 UBI Base OS ppc641e - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/ppc64le/baseos/source/SRPMS/
+  # - name: RHEL 8 UBI Appstream s390x
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 8 UBI Appstream s390x - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/debug/
+  #     - name: RHEL 8 UBI Appstream s390x - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/os/
+  #     - name: RHEL 8 UBI Appstream s390x - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/appstream/source/SRPMS/
+  # - name: RHEL 8 UBI Base OS s390x
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 8 UBI Base OS s390x - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/debug/
+  #     - name: RHEL 8 UBI Base OS s390x - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/os/
+  #     - name: RHEL 8 UBI Base OS s390x - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi8/8/s390x/baseos/source/SRPMS/
+
+  # # RHEL 9
+  # - name: RHEL 9 UBI Appstream x64
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 9 UBI Appstream - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/debug/
+  #     - name: RHEL 9 UBI Appstream - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/
+  #     - name: RHEL 9 UBI Appstream - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/source/SRPMS/
+  # - name: RHEL 9 UBI Base OS x64
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 9 UBI Base OS - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/baseos/debug/
+  #     - name: RHEL 9 UBI Base OS - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/baseos/os/
+  #     - name: RHEL 9 UBI Base OS - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/baseos/source/SRPMS/
+  # - name: RHEL 9 UBI Appstream ppc641e
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 9 UBI Appstream ppc641e - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/debug/
+  #     - name: RHEL 9 UBI Appstream ppc641e - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/os/
+  #     - name: RHEL 9 UBI Appstream ppc641e - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/appstream/source/SRPMS/
+  # - name: RHEL 9 UBI Base OS ppc641e
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 9 UBI Base OS ppc641e - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/baseos/debug/
+  #     - name: RHEL 9 UBI Base OS ppc641e - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/baseos/os/
+  #     - name: RHEL 9 UBI Base OS ppc641e - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/ppc64le/baseos/source/SRPMS/
+  # - name: RHEL 9 UBI Appstream s390x
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 9 UBI Appstream s390x - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/debug/
+  #     - name: RHEL 9 UBI Appstream s390x - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/os/
+  #     - name: RHEL 9 UBI Appstream s390x - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/appstream/source/SRPMS/
+  # - name: RHEL 9 UBI Base OS s390x
+  #   gpg_key: RPM-GPG-KEY-REDHAT
+  #   repositories:
+  #     - name: RHEL 9 UBI Base OS s390x - Debug
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/baseos/debug/
+  #     - name: RHEL 9 UBI Base OS s390x - OS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/baseos/os/
+  #     - name: RHEL 9 UBI Base OS s390x - SRPMS
+  #       content_type: yum
+  #       gpg_key: RPM-GPG-KEY-REDHAT
+  #       url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/s390x/baseos/source/SRPMS/
+
+satellite_rhel_product_name: "Red Hat Enterprise Linux for x86_64"
+satellite_capsule_product_name: "Red Hat Satellite Capsule"
+satellite_rhel_s390_product_name: "Red Hat Enterprise Linux for IBM z Systems"
+satellite_code_ready_s390_product_name: "Red Hat CodeReady Linux Builder for IBM z Systems"
+satellite_epel_product_name: "EPEL"
+
+satellite_lifecycle_envs:
+  - name: satellite_lifecycle_capsule
+    env_name: "satinfra"
+    prior: "Library"
+
+  - name: satellite_lifecycle_daily
+    env_name: "daily"
+    prior: "Library"
+  
+  - name: satellite_lifecycle_certify
+    env_name: "certify"
+    prior: "Library"
+
+  - name: satellite_lifecycle_monthly
+    env_name: "monthly"
+    prior: "certify"
+
+satellite_content_views:
+  - name: capsule6
+    repositories:
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream RPMs 9"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS RPMs 9"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: "Red Hat Satellite Maintenance {{ satellite_deployment_version }} for RHEL 9 x86_64 RPMs"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: "Red Hat Satellite Capsule {{ satellite_deployment_version }} for RHEL 9 x86_64 RPMs"
+        product: "{{ satellite_capsule_product_name }}"
+    lifecycle_environments: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_capsule') | map(attribute='env_name') }}"
+  # - name: rhel8_x86
+  #   repositories:
+  #     - name: "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8"
+  #       product: "{{ satellite_rhel_product_name }}"
+  #     - name: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8"
+  #       product: "{{ satellite_rhel_product_name }}"
+  #     - name: Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs
+  #       product: 'Red Hat Enterprise Linux for x86_64'
+  #   lifecycle_environments: Library
+  - name: rhel9_x86
+    repositories:
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream RPMs 9"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS RPMs 9"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: Red Hat Satellite Client 6 for RHEL 9 x86_64 RPMs
+        product: 'Red Hat Enterprise Linux for x86_64'
+    lifecycle_environments: Library
+  # - name: rhel8_s390
+  #   repositories:
+  #     - name: 'Red Hat Enterprise Linux 8 for IBM z Systems - AppStream RPMs 8'
+  #       product: "{{ satellite_rhel_s390_product_name }}"
+  #     - name: 'Red Hat Enterprise Linux 8 for IBM z Systems - BaseOS RPMs 8'
+  #       product: "{{ satellite_rhel_s390_product_name }}"
+  #     - name: 'Red Hat CodeReady Linux Builder for RHEL 8 IBM z Systems RPMs 8'
+  #       product: "{{ satellite_code_ready_s390_product_name }}"
+  #     - name: 'Red Hat Satellite Client 6 for RHEL 8 s390x RPMs'
+  #       product: "{{ satellite_rhel_s390_product_name }}"
+  #   lifecycle_environments: Library
+  # - name: rhel9_s390
+  #   repositories:
+  #     - name: 'Red Hat Enterprise Linux 9 for IBM z Systems - AppStream RPMs 9'
+  #       product: "{{ satellite_rhel_s390_product_name }}"
+  #     - name: 'Red Hat Enterprise Linux 9 for IBM z Systems - BaseOS RPMs 9'
+  #       product: "{{ satellite_rhel_s390_product_name }}"
+  #     - name: 'Red Hat CodeReady Linux Builder for RHEL 9 IBM z Systems RPMs 9'
+  #       product: "{{ satellite_code_ready_s390_product_name }}"
+  #     - name: 'Red Hat Satellite Client 6 for RHEL 9 s390x RPMs'
+  #       product: "{{ satellite_rhel_s390_product_name }}"
+  #   lifecycle_environments: Library
+  # - name: epel8_x86
+  #   repositories:
+  #     - name: 'EPEL8_X86'
+  #       product: "{{ satellite_epel_product_name }}"
+  #   lifecycle_environments: Library
+  - name: epel9_x86
+    repositories:
+      - name: 'EPEL9_X86'
+        product: "{{ satellite_epel_product_name }}"
+    lifecycle_environments: Library
+  # - name: epel8_s390
+  #   repositories:
+  #     - name: 'EPEL8_S390X'
+  #       product: "{{ satellite_epel_product_name }}"
+  #   lifecycle_environments: Library
+  # - name: epel9_s390
+  #   repositories:
+  #     - name: 'EPEL9_S390X'
+  #       product: "{{ satellite_epel_product_name }}"
+  #   lifecycle_environments: Library
+
+    # Composite
+  # - name: rhel8_epel_x86
+  #   components:
+  #     - content_view: rhel8_x86
+  #       latest: true
+  #     - content_view: epel8_x86
+  #       latest: true
+  #   lifecycle_environments:
+  #     - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_daily') | map(attribute='env_name') | join(', ') }}"
+  #     - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_certify') | map(attribute='env_name') | join(', ') }}"
+  #     - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"
+  - name: rhel9_epel_x86
+    components:
+      - content_view: rhel9_x86
+        latest: true
+      - content_view: epel9_x86
+        latest: true
+    lifecycle_environments:
+      - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_daily') | map(attribute='env_name') | join(', ') }}"
+      - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_certify') | map(attribute='env_name') | join(', ') }}"
+      - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"
+  # - name: rhel8_epel_s390
+  #   components:
+  #     - content_view: rhel8_s390
+  #       latest: true
+  #     - content_view: epel8_s390
+  #       latest: true
+  #   lifecycle_environments:
+  #     - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_certify') | map(attribute='env_name') | join(', ') }}"
+  #     - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"
+  # - name: rhel9_epel_s390
+  #   components:
+  #     - content_view: rhel9_s390
+  #       latest: true
+  #     - content_view: epel9_s390
+  #       latest: true
+  #   lifecycle_environments:
+  #     - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_certify') | map(attribute='env_name') | join(', ') }}"
+  #     - "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"    
+
+satellite_activation_keys:
+  - name: capsule6-satinfra
+    lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_capsule') | map(attribute='env_name') | join(', ') }}"
+    content_view: capsule6
+    content_overrides:
+      - label: rhel-9-for-x86_64-baseos-rpms
+        override: enabled
+      - label: rhel-9-for-x86_64-appstream-rpms
+        override: enabled
+      - label: "satellite-capsule-{{ satellite_deployment_version }}-for-rhel-9-x86_64-rpms"
+        override: enabled
+      - label: "satellite-maintenance-{{ satellite_deployment_version }}-for-rhel-9-x86_64-rpms"
+        override: enabled
+    service_level: "Premium"
+  # - name: rhel8_epel_x86-daily 
+  #   lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_daily') | map(attribute='env_name') | join(', ') }}"
+  #   content_view: rhel8_epel_x86
+  #   content_overrides:
+  #     - label: rhel-8-for-x86_64-baseos-rpms
+  #       override: enabled
+  #     - label: rhel-8-for-x86_64-appstream-rpms
+  #       override: enabled
+  #     - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL8_X86"
+  #       override: enabled
+  #     - label: satellite-client-6-for-rhel-8-x86_64-rpms
+  #       override: enabled
+  #   service_level: "Premium"
+  - name: rhel9_epel_x86-daily 
+    lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_daily') | map(attribute='env_name') | join(', ') }}"
+    content_view: rhel9_epel_x86
+    content_overrides:
+      - label: rhel-9-for-x86_64-baseos-rpms
+        override: enabled
+      - label: rhel-9-for-x86_64-appstream-rpms
+        override: enabled
+      - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL9_X86"
+        override: enabled
+      - label: satellite-client-6-for-rhel-9-x86_64-rpms
+        override: enabled
+    service_level: "Premium"
+  # - name: rhel8_epel_x86-certify 
+  #   lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_certify') | map(attribute='env_name') | join(', ') }}"
+  #   content_view: rhel8_epel_x86
+  #   content_overrides:
+  #     - label: rhel-8-for-x86_64-baseos-rpms
+  #       override: enabled
+  #     - label: rhel-8-for-x86_64-appstream-rpms
+  #       override: enabled
+  #     - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL8_X86"
+  #       override: enabled
+  #     - label: satellite-client-6-for-rhel-8-x86_64-rpms
+  #       override: enabled
+  #   service_level: "Premium"
+  - name: rhel9_epel_x86-certify 
+    lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_certify') | map(attribute='env_name') | join(', ') }}"
+    content_view: rhel9_epel_x86
+    content_overrides:
+      - label: rhel-9-for-x86_64-baseos-rpms
+        override: enabled
+      - label: rhel-9-for-x86_64-appstream-rpms
+        override: enabled
+      - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL9_X86"
+        override: enabled
+      - label: satellite-client-6-for-rhel-9-x86_64-rpms
+        override: enabled
+    service_level: "Premium"
+  # - name: rhel8_epel_x86-monthly 
+  #   lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"
+  #   content_view: rhel8_epel_x86
+  #   content_overrides:
+  #     - label: rhel-8-for-x86_64-baseos-rpms
+  #       override: enabled
+  #     - label: rhel-8-for-x86_64-appstream-rpms
+  #       override: enabled
+  #     - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL8_X86"
+  #       override: enabled
+  #     - label: satellite-client-6-for-rhel-8-x86_64-rpms
+  #       override: enabled
+  #   service_level: "Premium"
+  - name: rhel9_epel_x86-monthly 
+    lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"
+    content_view: rhel9_epel_x86
+    content_overrides:
+      - label: rhel-9-for-x86_64-baseos-rpms
+        override: enabled
+      - label: rhel-9-for-x86_64-appstream-rpms
+        override: enabled
+      - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL9_X86"
+        override: enabled
+      - label: satellite-client-6-for-rhel-9-x86_64-rpms
+        override: enabled
+    service_level: "Premium"
+  # - name: rhel8_epel_s390-monthly 
+  #   lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"
+  #   content_view: rhel8_epel_s390
+  #   content_overrides:
+  #     - label: rhel-8-for-s390x-baseos-rpms
+  #       override: enabled
+  #     - label: rhel-8-for-s390x-appstream-rpms
+  #       override: enabled
+  #     - label: codeready-builder-for-rhel-8-s390x-rpms
+  #       override: enabled
+  #     - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL8_S390X"
+  #       override: enabled
+  #     - label: satellite-client-6-for-rhel-8-s390x-rpms
+  #       override: enabled
+  #   service_level: "Premium"
+  # - name: rhel9_epel_s390-monthly 
+  #   lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_lifecycle_monthly') | map(attribute='env_name') | join(', ') }}"
+  #   content_view: rhel9_epel_s390
+  #   content_overrides:
+  #     - label: rhel-9-for-s390x-baseos-rpms
+  #       override: enabled
+  #     - label: rhel-9-for-s390x-appstream-rpms
+  #       override: enabled
+  #     - label: rhel-9-for-s390x-baseos-rpms
+  #       override: enabled
+  #     - label: codeready-builder-for-rhel-9-s390x-rpms
+  #       override: enabled
+  #     - label: "{{ satellite_organization }}_{{ satellite_epel_product_name }}_EPEL9_S390X"
+  #       override: enabled
+  #     - label: satellite-client-6-for-rhel-9-s390x-rpms
+  #       override: enabled
+  #   service_level: "Premium"
+
+satellite_locations:
+  ### Parent locations for regions go here
+  - name: NORAM
+    organizations: "{{ satellite_organization }}"
+
+  # ### Children locations for countries (parent = regions) go here
+  # - name: US
+  #   organizations: "{{ satellite_organization }}"
+  #   parent: NORAM
+
+  # ### Children locations for datacenter (parent = country) go here
+  # - name: Datacenter
+  #   organizations: "{{ satellite_organization }}"
+  #   parent: NORAM/US\
+...

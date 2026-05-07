@@ -1,0 +1,12 @@
+---
+- name: Install Capsule Packages | Get host package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install | Install satellite capsule packages
+  ansible.builtin.package:
+    name: "{{ satellite_capsule_packages }}"
+    state: present
+  when: "'satellite-capsule' not in ansible_facts['packages']"
+
+...

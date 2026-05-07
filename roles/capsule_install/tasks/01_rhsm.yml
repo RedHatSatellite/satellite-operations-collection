@@ -1,0 +1,64 @@
+---
+- name: Set timezone to UTC
+  community.general.timezone:
+    name: UTC
+
+- name: Restart crond
+  ansible.builtin.service:
+    name: crond
+    state: restarted
+
+- name: RHSM Subscribe | Get a list of all the files in /etc/yum.repos.d
+  ansible.builtin.find:
+    paths: /etc/yum.repos.d
+    patterns: "*.repo"
+  register: repo_files
+
+# - name: RHSM Subscribe | Check if capsule is already registered # noqa: command-instead-of-shell no-changed-when risky-shell-pipe
+#   ansible.builtin.shell: subscription-manager list | grep -i "Satellite Capsule"  > /dev/null
+#   register: status
+#   failed_when: status['rc'] not in [1,0]
+#   become: true
+
+- name: Subscription block
+  # when: status['rc'] == 1
+  block:
+    - name: RHSM Subscribe | Remove any file in /etc/yum.repos.d that isn't redhat.repo
+      ansible.builtin.file:
+        path: "{{ item['path'] }}"
+        state: absent
+      when: item['path'] != "/etc/yum.repos.d/redhat.repo"
+      with_items: "{{ repo_files['files'] }}"
+
+    - name: RHSM Subscribe | Remove old subscription
+      community.general.redhat_subscription:
+        state: absent
+
+    - name: RHSM Subscribe | Remove old RPMs from Satellite 6
+      ansible.builtin.yum:
+        name:
+          - katello-ca-consumer-*.noarch
+        state: absent
+
+    - name: RHSM Subscribe | Clean subscription manager
+      ansible.builtin.shell: subscription-manager clean
+
+    - name: RHSM Subscribe | Generate registration command
+      redhat.satellite.registration_command:
+        username: "{{ satellite_admin_username }}"
+        password: "{{ satellite_admin_password }}"
+        server_url: "https://{{ satellite_fqdn }}"
+        organization: "{{ satellite_capsule_organization }}"
+        activation_keys: "{{ satellite_capsule_ak }}"
+        location: "{{ satellite_capsule_location }}"
+        setup_insights: false
+        insecure: true
+        validate_certs: false
+        force: true
+      register: command
+
+    - name: RHSM Subscribe | Perform registration # noqa: command-instead-of-shell no-changed-when
+      ansible.builtin.shell:
+        cmd: "{{ command.registration_command }}"
+
+...

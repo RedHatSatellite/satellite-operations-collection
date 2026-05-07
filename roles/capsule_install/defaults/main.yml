@@ -1,0 +1,103 @@
+# Capsule install requirements
+satellite_os_version: "9"
+satellite_server_basearch: "x86_64"
+satellite_min_cpu_count: 4
+# Size in MB
+satellite_min_memory_size: 12288
+# Size in GB
+capsule_data_disk_min_size: 500
+capsule_min_pulp_size: 300
+capsule_min_pgsql_size: 20
+
+# Storage
+capsule_pulp_size: 1500g
+capsule_pgsql_size: 150g
+capsule_data_device: /dev
+capsule_vg_name: cap_vg01
+capsule_req_dirs:
+  - mount_point: /var/lib/pulp
+    lv_name: pulp
+    lv_size: "{{ capsule_pulp_size }}"
+  - mount_point: /var/lib/pgsql
+    lv_name: pgsql
+    lv_size: "{{ capsule_pgsql_size }}"
+
+# Packages
+satellite_capsule_packages:
+  - satellite-capsule
+  - chrony
+  - sos
+  - fapolicyd 
+  - vim 
+  - bash-completion 
+  - bind-utils
+
+satellite_installer_scenario: "capsule"
+
+# Administration
+satellite_admin_username: "admin"
+satellite_admin_password:
+
+satellite_capsule_organization:
+satellite_capsule_ak:
+satellite_capsule_location:
+satellite_fqdn:
+satellite_capsule_sync_wait_time: 86400
+
+# Certificates
+# satellite_capsule_vip: "capsule.example.com"
+# satellite_CSR: "false"
+# satellite_country: "US"
+# satellite_state: "FL"
+# satellite_city: "Tampa"
+# satellite_company: "Example LLC"
+# satellite_organizational_unit: "EXAMPLE"
+# satellite_ip: "192.168.2.34"
+# satellite_short: "satellite"
+# satellite_capsule_short: "{{ ansible_hostname }}"
+# satellite_capsule_public_ip: "192.168.2.4"
+
+# Load Balancing
+satellite_haproxy: false
+# satellite_loadbalancer_fqdn:
+# satellite_loadbalancer_ak:
+satellite_loadbalancer_ports:
+  - 80/tcp
+  - 443/tcp
+  - 8000/tcp
+  - 9090/tcp
+
+# Install
+satellite_installer_options:
+  - '--foreman-proxy-register-in-foreman true'
+  - '--foreman-proxy-foreman-base-url https://{{ satellite_fqdn }}'
+  - '--foreman-proxy-trusted-hosts {{ satellite_fqdn }}'
+  - '--foreman-proxy-trusted-hosts {{ ansible_fqdn }}'
+  - '--foreman-proxy-oauth-consumer-key {{ foreman_proxy_oauth_consumer_key }}'
+  - '--foreman-proxy-oauth-consumer-secret {{ foreman_proxy_oauth_consumer_secret }}'
+  - '--foreman-proxy-plugin-remote-execution-script-mode=ssh'
+  - '--certs-tar-file /root/capsule_cert/{{ ansible_fqdn }}/{{ ansible_fqdn }}-capsule-certs.tar'
+  - '--enable-foreman-proxy-plugin-remote-execution-script'
+  - '--foreman-proxy-content-enable-docker=false'
+
+satellite_installer_loadbalanced_options:
+  - '--foreman-proxy-register-in-foreman true'
+  - '--foreman-proxy-foreman-base-url https://{{ satellite_fqdn }}'
+  - '--foreman-proxy-trusted-hosts {{ satellite_fqdn }}'
+  - '--foreman-proxy-trusted-hosts {{ ansible_fqdn }}'
+  - '--foreman-proxy-oauth-consumer-key {{ foreman_proxy_oauth_consumer_key }}'
+  - '--foreman-proxy-oauth-consumer-secret {{ foreman_proxy_oauth_consumer_secret }}'
+  - '--foreman-proxy-plugin-remote-execution-script-mode=ssh'
+  - '--certs-tar-file /root/capsule_cert/{{ ansible_fqdn }}/{{ ansible_fqdn }}-capsule-certs.tar'
+  - '--enable-foreman-proxy-plugin-remote-execution-script'
+  - '--foreman-proxy-content-enable-docker=false'
+  - '--certs-cname {{ satellite_loadbalancer_fqdn }}'
+  - '--foreman-proxy-registration-url https://{{ satellite_loadbalancer_fqdn }}:9090'
+  - '--foreman-proxy-template-url http://{{ satellite_loadbalancer_fqdn }}:8000'
+
+# Content
+satellite_capsule_lifecycle_envs:
+  - daily
+  - certify
+  - monthly
+...

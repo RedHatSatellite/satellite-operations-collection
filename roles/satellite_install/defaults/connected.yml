@@ -1,0 +1,318 @@
+# Credentials
+satellite_admin_username: admin
+satellite_admin_password:
+satellite_username: "{{ satellite_admin_username }}"
+satellite_password: "{{ satellite_admin_password }}"
+
+# System requirements
+satellite_min_cpu_count: 4
+# Size must be integer, MB
+satellite_min_memory_size: 20240
+# Size must be integer, GB
+satellite_data_disk_min_size: 500
+# Size must be integer, GB
+satellite_min_pulp_size: 300
+# Size must be integer, GB
+satellite_min_pgsql_size: 20
+
+# Administration
+# -------
+# This the Satellite URL, using FQDN of host
+satellite_server_url: "https://{{ ansible_fqdn }}"
+
+# Proxy Server settings - Leave commented if proxy is not used
+# satellite_proxy_server:
+# satellite_proxy_port:
+# satellite_proxy_scheme:
+
+# RHN Org and Activation Key
+satellite_rhn_org: 
+satellite_rhn_activation_key:
+
+# Satellite Organization name
+satellite_organization:
+
+# Satellite Location name
+satellite_initial_location: 
+satellite_location: "{{ satellite_initial_location }}"
+
+# Primary POC email for Satellite
+satellite_email:
+
+# Git URL - GitLab, GitHub, etc
+satellite_giturl: 
+
+# Location of manifest path, on connected Satellite - full path
+satellite_manifest_path:
+
+# Default language
+satellite_language: "en_US.utf-8"
+
+# Storage
+# -------
+satellite_pulp_size: 1500g
+satellite_pgsql_size: 150g
+satellite_req_dirs:
+  - mount_point: /var/lib/pulp
+    lv_name: lv_rhspulp
+    lv_size: "{{ satellite_pulp_size }}"
+  - mount_point: /var/lib/pgsql
+    lv_name: lv_pgsql
+    lv_size: "{{ satellite_pgsql_size }}"
+# Manually define device name if desired (required if multiple devices are suitable as the automation can only select 1)
+# satellite_data_device_name: sdc
+satellite_data_disk: "{{ satellite_data_device }}/{{ satellite_data_device_name }}"
+satellite_vg_name: vg_rhsat
+
+# Satellite
+# -------
+satellite_rhn_connected: true
+satellite_ak: satellite6-satinfra
+satellite_selinux_state: "enforcing"
+satellite_installer_scenario: "satellite"
+satellite_sync_time: "16:30:00"
+satellite_sync_date: "{{ ansible_date_time['date'] }} {{ satellite_sync_time }} {{ ansible_date_time['tz'] }}"
+satellite_syncplan_interval: "daily"
+satellite_syncplan_name: "{{ satellite_syncplan_interval | capitalize }} {{ satellite_organization }} Products"
+satellite_subscription_to_search: "Red Hat Satellite Infrastructure Subscription"
+satellite_repo_sync_wait_time: 21600 # Seconds
+
+satellite_installer_options:
+  - '--foreman-initial-admin-username {{ satellite_admin_username }}'
+  - '--foreman-initial-admin-password {{ satellite_admin_password }}'
+  - '--foreman-initial-organization {{ satellite_organization }}'
+  - '--foreman-initial-location {{ satellite_initial_location }}'
+
+# Basic Settings
+# -------
+satellite_settings:
+  - name: "default_download_policy"
+    value: "immediate"
+  - name: "default_redhat_download_policy"
+    value: "immediate"
+  - name: "default_proxy_download_policy"
+    value: "immediate"
+  - name: "errata_status_installable"
+    value: "true"
+  - name: "unregister_delete_host"
+    value: "true"
+  - name: "template_sync_associate"
+    value: "never"
+  - name: "template_sync_branch"
+    value: "master"
+  - name: "template_sync_repo"
+    value: "{{ satellite_giturl }}"
+  - name: "template_sync_force"
+    value: "true"
+  - name: "template_sync_lock"
+    value: "true"
+  - name: "administrator"
+    value: "{{ satellite_email }}"
+  - name: "db_pending_seed"
+    value: "false"
+  - name: "entries_per_page"
+    value: "100"
+  - name: "unregister_delete_host"
+    value: "true"
+  - name: "remote_execution_workers_pool_size"
+    value: "100"
+  - name: "ignored_interface_identifiers"
+    value: [ "lo","en*v*", "usb*", "vnet*", "macvtap*", "_vdsmdummy_", "veth*", "docker*", "tap*", "qbr*", "qvb*", "qvo*", "qr-*", "qg-*", "vlinuxbr*", "vovsbr*" ,"bond*" ]
+  - name: "host_tasks_workers_pool_size"
+    value: "100"
+  - name: "login_text"
+    value: "This system is a restricted access system.  All activity on this system is subject to monitoring.  If information collected reveals possible criminal activity or activity that exceeds privileges, evidence of such activity may be provided to the relevant authorities for further action.  By continuing past this point, you expressly consent to this monitoring."
+
+satellite_packages:
+  - satellite
+  - chrony
+  - sos
+  - fapolicyd
+  - vim
+  - bash-completion
+  - bind-utils
+
+satellite_size:
+  - name: default
+    min_hosts: 0
+    max_hosts: 5000
+    min_ram: 20
+    min_cpu: 4
+  - name: medium
+    min_hosts: 5000
+    max_hosts: 10000
+    min_ram: 32
+    min_cpu: 8
+  - name: large
+    min_hosts: 10000
+    max_hosts: 20000
+    min_ram: 64
+    min_cpu: 16
+  - name: extra-large
+    min_hosts: 20000
+    max_hosts: 60000
+    min_ram: 128
+    min_cpu: 32
+  - name: extra-extra-large
+    min_hosts: 60000
+    max_hosts: 100000
+    min_ram: 256
+    min_cpu: 48
+
+satellite_redhat_repos:
+  - name: "Red Hat Satellite Capsule {{ satellite_deployment_version }} for RHEL {{ ansible_distribution_major_version }} x86_64 (RPMs)"
+    label: "satellite-capsule-{{ satellite_deployment_version }}-for-rhel-{{ ansible_distribution_major_version }}-x86_64-rpms"
+    all: "true"
+  - name: "Red Hat Satellite Maintenance {{ satellite_deployment_version }} for RHEL {{ ansible_distribution_major_version }} x86_64 (RPMs)"
+    label: "satellite-maintenance-{{ satellite_deployment_version }}-for-rhel-{{ ansible_distribution_major_version }}-x86_64-rpms"
+    all: "true"
+  - name: "Red Hat Satellite {{ satellite_deployment_version }} for RHEL {{ ansible_distribution_major_version }} x86_64 (RPMs)"
+    label: "satellite-{{ satellite_deployment_version }}-for-rhel-{{ ansible_distribution_major_version }}-x86_64-rpms"
+    all: "true"
+  - name: "Red Hat Satellite Client 6 for RHEL 9 x86_64 RPMs"
+    label: "satellite-client-6-for-rhel-9-x86_64-rpms"
+    all: "true"
+  # - name: "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs"
+  #   label: "satellite-client-6-for-rhel-8-x86_64-rpms"
+  #   all: "true"
+  # - name: "Red Hat Satellite Client 6 for RHEL 8 s390x RPMs"
+  #   label: "satellite-client-6-for-rhel-8-s390x-rpms"
+  #   all: "true"
+  # - name: "Red Hat Satellite Client 6 for RHEL 9 s390x RPMs"
+  #   label: "satellite-client-6-for-rhel-9-s390x-rpms"
+  #   all: "true"
+  - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS (RPMs)"
+    label: rhel-9-for-x86_64-baseos-rpms
+    repos:
+      - releasever: "9"
+    all: "false"
+  - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream (RPMs)"
+    label: rhel-9-for-x86_64-appstream-rpms
+    repos:
+      - releasever: "9"
+    all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS (RPMs)"
+  #   label: rhel-8-for-x86_64-baseos-rpms
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for x86_64 - AppStream (RPMs)"
+  #   label: rhel-8-for-x86_64-appstream-rpms
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for IBM z Systems - AppStream RPMs 8"
+  #   label: "rhel-8-for-s390x-appstream-rpms"
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 8 for IBM z Systems - BaseOS RPMs 8"
+  #   label: "rhel-8-for-s390x-baseos-rpms"
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 9 for IBM z Systems - AppStream RPMs 9"
+  #   label: "rhel-9-for-s390x-appstream-rpms"
+  #   repos:
+  #     - releasever: "9"
+  #   all: "false"
+  # - name: "Red Hat Enterprise Linux 9 for IBM z Systems - BaseOS RPMs 9"
+  #   label: "rhel-9-for-s390x-baseos-rpms"
+  #   repos:
+  #     - releasever: "9"
+  #   all: "false"
+  # - name: "Red Hat CodeReady Linux Builder for RHEL 8 IBM z Systems RPMs 8"
+  #   label: "codeready-builder-for-rhel-8-s390x-rpms"
+  #   repos:
+  #     - releasever: "8"
+  #   all: "false"
+  # - name: "Red Hat CodeReady Linux Builder for RHEL 9 IBM z Systems RPMs 9"
+  #   label: "codeready-builder-for-rhel-9-s390x-rpms"
+  #   repos:
+  #     - releasever: "9"
+  #   all: "false"
+
+satellite_content_credentials:
+  - name: RPM-GPG-KEY-EPEL
+    content_type: gpg_key
+    content: "{{ lookup('url', 'https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL', split_lines=False) }}"
+  # - name: RPM-GPG-KEY-EPEL8
+  #   content_type: gpg_key
+  #   content: "{{ lookup('url', 'https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8', split_lines=False) }}"
+  - name: RPM-GPG-KEY-EPEL9
+    content_type: gpg_key
+    content: "{{ lookup('url', 'https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9', split_lines=False) }}"
+
+satellite_products:
+  - name: EPEL
+    gpg_key: RPM-GPG-KEY-EPEL
+    repositories:
+      # - name: EPEL8_X86
+      #   content_type: yum
+      #   gpg_key: RPM-GPG-KEY-EPEL8
+      #   url: https://dl.fedoraproject.org/pub/epel/8/Everything/x86_64/
+      - name: EPEL9_X86
+        content_type: yum
+        gpg_key: RPM-GPG-KEY-EPEL9
+        url: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/
+      # - name: EPEL8_S390X
+      #   content_type: yum
+      #   gpg_key: RPM-GPG-KEY-EPEL8
+      #   url: https://dl.fedoraproject.org/pub/epel/8/Everything/s390x/
+      # - name: EPEL9_S390X
+      #   content_type: yum
+      #   gpg_key: RPM-GPG-KEY-EPEL9
+      #   url: https://dl.fedoraproject.org/pub/epel/9/Everything/s390x/
+
+satellite_rhel_product_name: "Red Hat Enterprise Linux for x86_64"
+satellite_satellite_product_name: "Red Hat Satellite"
+
+satellite_lifecycle_envs:
+  - name: satellite_infra
+    env_name: "satinfra"
+    prior: "Library"
+
+satellite_content_views:
+  - name: satellite6
+    repositories:
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream RPMs 9"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS RPMs 9"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: "Red Hat Satellite Maintenance {{ satellite_deployment_version }} for RHEL 9 x86_64 RPMs"
+        product: "{{ satellite_rhel_product_name }}"
+      - name: "Red Hat Satellite {{ satellite_deployment_version }} for RHEL 9 x86_64 RPMs"
+        product: "{{ satellite_satellite_product_name }}"
+    lifecycle_environments: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_infra') | map(attribute='env_name') }}"
+
+satellite_activation_keys:
+  - name: "{{ satellite_ak }}"
+    lifecycle_environment: "{{ satellite_lifecycle_envs | selectattr('name', 'match', 'satellite_infra') | map(attribute='env_name') | join(', ') }}"
+    content_view: satellite6
+    content_overrides:
+      - label: rhel-9-for-x86_64-baseos-rpms
+        override: enabled
+      - label: rhel-9-for-x86_64-appstream-rpms
+        override: enabled
+      - label: "satellite-{{ satellite_deployment_version }}-for-rhel-9-x86_64-rpms"
+        override: enabled
+      - label: "satellite-maintenance-{{ satellite_deployment_version }}-for-rhel-9-x86_64-rpms"
+        override: enabled
+    service_level: "Premium"
+
+satellite_locations:
+  ### Parent locations for regions go here
+  - name: NORAM
+    organizations: "{{ satellite_organization }}"
+
+  # ### Children locations for countries (parent = regions) go here
+  # - name: US
+  #   organizations: "{{ satellite_organization }}"
+  #   parent: NORAM
+
+  # ### Children locations for datacenter (parent = country) go here
+  # - name: Datacenter
+  #   organizations: "{{ satellite_organization }}"
+  #   parent: NORAM/US
+
+...

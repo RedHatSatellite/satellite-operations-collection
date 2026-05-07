@@ -1,0 +1,18 @@
+---
+- name: Export Content Library
+  hosts: localhost # Run from localhost, modules will excute with API to Satellite
+  gather_facts: true
+
+  vars:
+    satellite_server_url: "satellite.local" # Connected Satellite FQDN
+    satellite_username: "admin" # Example username
+    satellite_password: "redhat123" # Example password
+    satellite_organization: "home" # Satellite organization
+    satellite_export_content_view_name: satellite6 # Name of the content view
+    satellite_export_content_view_version_number: "20250618.1" # Version number of content view to be exported
+    satellite_export_content_view_format: importable # importable creates *.tar, syncable needs to be hosted via web server for import
+    satellite_export_destination_server_fqdn: disconnected.satellite.local # Optional
+
+  roles:
+    - name: export_content_library
+...

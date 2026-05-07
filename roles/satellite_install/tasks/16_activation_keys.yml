@@ -1,0 +1,6 @@
+---
+- name: Activation Keys | Create activation keys
+  ansible.builtin.include_role:
+    name: redhat.satellite.activation_keys
+  loop: "{{ satellite_activation_keys }}"
+...
